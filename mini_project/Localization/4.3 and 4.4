@@ -1,0 +1,85 @@
+
+
+#include <Encoder.h>
+
+#define D2 4
+#define M1DIR 7
+#define M2DIR 8
+#define M1PWM 9
+#define M2PWM 10
+#define SF 12
+
+int initialSpeed = 150; //75
+
+const float pii = 3.14159;
+const float tick = pii/800; //maybe right (check this)
+
+const float pi = 0.15717;
+const float r = 0.05;
+const float b = 0.1;
+
+float leftPosition = 0;
+float rightPosition = 0;
+float xNew = 0;
+float yNew = 0;
+float phiNew = 0;
+float xOld = 0;
+float yOld = 0;
+float phiOld = 0;
+
+float deltaLeft = 0;
+float deltaRight = 0;
+
+
+Encoder leftKnob(3, 4);//maybe change these depending on how you wire up the arduino
+Encoder rightKnob(2, 6);
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  pinMode(D2, OUTPUT);
+  pinMode(M1DIR, OUTPUT);
+  pinMode(M2DIR, OUTPUT);
+  pinMode(M1PWM, OUTPUT);
+  pinMode(M2PWM, OUTPUT);
+  pinMode(SF, INPUT);
+  digitalWrite(D2, HIGH);
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  analogWrite(M1PWM, 25); //9
+  digitalWrite(M1DIR, HIGH); //CHANGES THE DIRECTION OF THE WHEEL ROTATION
+  long newLeftPosition;
+  long newRightPosition;
+
+  newLeftPosition = leftKnob.read();
+  newRightPosition = rightKnob.read();
+
+  if(newRightPosition != rightPosition || newLeftPosition != leftPosition){
+    deltaRight = (newRightPosition - rightPosition);// * tick;
+    deltaLeft = (newLeftPosition - leftPosition);// * tick;
+
+    float addition = deltaRight + deltaLeft;
+    float subtraction = deltaRight - deltaLeft;
+    //changed the equations from the assignment 2 options to not use the change in time (not using interrupts)
+    xNew = xOld + cos(phiOld) * (r/2) * (addition);
+    yNew = yOld + sin(phiOld) * (r/2) * (addition);
+    phiNew = phiOld + (r/b) * (subtraction);
+
+    //serial print shit here (fill in later)
+ 
+    Serial.println(newRightPosition);
+
+    
+
+    
+  }
+  if(Serial.available()){
+    Serial.read();
+    Serial.print("Reset");
+    leftKnob.write(0);
+    rightKnob.write(0);
+  }
+}
