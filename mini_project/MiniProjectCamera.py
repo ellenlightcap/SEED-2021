@@ -9,15 +9,20 @@ import numpy as np
 import smbus
 import board
 import busio
+import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
 
-# for RPI version 1, use “bus = smbus.SMBus(0)”
-bus = smbus.SMBus(1)
 
-# Initialise I2C bus.
-i2c = busio.I2C(board.SCL, board.SDA)
 
-# This is the address we setup in the Arduino Program
-address = 0x04
+def LCDDisplay(desired,actual):
+    lcd.clear()
+    lcd.color = [100, 100, 100]
+    #time.sleep(1)
+    time.sleep(0.1)
+    lcd.message = "Setpoint: " + str(desired) + "\nPostion: " + str(actual)
+    #lcd.color = [0, 0, 0]
+    #time.sleep(1)
+    time.sleep(0.1)
+    return 1
 
 def writeNumber(value):
     #bus.write_byte(address, value)
@@ -29,6 +34,11 @@ def writeNumber(value):
         return -1
     
     return 0
+
+def readNumber():
+    #number = bus.read_byte(address)
+    number = bus.read_byte_data(address, 0)
+    return number
 
 #continuously takes pictures and checks for aruco markers
 def FindQuadrant(corners, ids, WIDTH, HEIGHT):
@@ -55,6 +65,20 @@ def FindQuadrant(corners, ids, WIDTH, HEIGHT):
                 return 3
 
 #MAIN PROGRAM
+
+# for RPI version 1, use “bus = smbus.SMBus(0)”
+bus = smbus.SMBus(1)
+
+# Initialise I2C bus.
+i2c = busio.I2C(board.SCL, board.SDA)
+
+lcd_columns = 16
+lcd_rows = 2
+lcd = character_lcd.Character_LCD_RGB_I2C(i2c, lcd_columns, lcd_rows)
+
+# This is the address we setup in the Arduino Program
+address = 0x04
+
 #initializing camera
 camera = PiCamera()
 rawCapture = PiRGBArray(camera)
@@ -91,6 +115,15 @@ while loop:
         print(quadrant)
 
         print(writeNumber(quadrant))
+
+        time.sleep(1)
+
+        newQuadrant = readNumber()
+
+        time.sleep(0.1)
+
+        if(quadrant != None):
+            LCDDisplay(quadrant,newQuadrant)
 
         rawCapture.truncate(0)
     #exits loop when ctl+c is pressed
