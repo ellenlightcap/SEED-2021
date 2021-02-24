@@ -3,7 +3,8 @@
 #define SLAVE_ADDRESS 0x04
 int number = 0;
 int state = 0;
-int data[32] = {0};
+byte data[32] = {0};
+
 
 void setup() {
   pinMode(13, OUTPUT);
@@ -24,9 +25,20 @@ void loop() {
 
 // callback for received data
 void receiveData(int byteCount){
+    int i=0;
     while(Wire.available()) {
-     Serial.print(Wire.read());
-     Serial.print(' ');  
+     data[i] = Wire.read();
+     Serial.print(data[i]);
+     Serial.print(' ');
+     i++;
+    }
+    //Serial.println(' ');
+    i--;
+    if (data[(i-1)] == 0){
+      number=data[i]+5;
+    }
+    if (data[(i-1)] == 1){
+      number=data[i]+10;
     }
 }
 
