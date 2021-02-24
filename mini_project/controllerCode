@@ -13,7 +13,7 @@ Encoder myEnc(2, 6);
 
 
 float kp = 0.62;//0.6275;
-float ki = 0.19;//0.024, increased a lot cuz we want wind up
+float ki = 0.19;//0.024, increased a lot cuz we want wind up -> ensures we don't stop before the position we want -> increase for better transient response
 float integrator = 0;
 float e = 0;
 float ts = 0;
