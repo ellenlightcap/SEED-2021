@@ -30,7 +30,7 @@ int finalVolt = 5;
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(250000);
+  Serial.begin(9600);
 
   pinMode(D2, OUTPUT);
   pinMode(M1DIR, OUTPUT);
@@ -46,41 +46,50 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
     time_now = millis();
-    Serial.println(time_now);
+    Serial.print(time_now);
+    Serial.print("\t");
     
     startingPosition = myEnc.read();
-    Serial.println("Initial Position: ");
-    Serial.println(startingPosition);
+    Serial.print(startingPosition);
+    Serial.print("\t");
 
     // the program will initially output a motor voltage command of 0, changing to a desired positive value at 1 second.
     //By motor voltage command, we mean the value used in the analogWritefunction)
     if(time_now < 1000){
       analogWrite(M1PWM, 0);
       digitalWrite(M1DIR, HIGH);
-      //Serial.println(initialVolt);
+      Serial.print(initialVolt);
+      Serial.print("\t");
+      
     }
     if(time_now >= 1000){
       analogWrite(M1PWM, 255);//255 is 5V
       digitalWrite(M1DIR, HIGH);
-      //Serial.println(finalVolt);
+      Serial.print(finalVolt);
+      Serial.print("\t");
     }
 
     //read motor encoder and calculate the angular position (relative to the starting position)
     finalPosition = (myEnc.read());
-    Serial.println("Final: ");
-    Serial.println(finalPosition);
+    //Serial.println("Final: ");
+    Serial.print(finalPosition);
+    Serial.print("\t");
     
     difference = finalPosition - startingPosition;
-    Serial.println("difference: ");
-    Serial.println(difference);
+    //Serial.println("difference: ");
+    Serial.print(difference);
+    Serial.print("\t");
     
-    angularPosition = 0.0019634*difference; //amount of radians rotated
-    Serial.println("angular Position: ");
-    Serial.println(angularPosition);
+    angularPosition = 0.0019634*difference; //amount of radians rotated: 0.0019634 = (2pi)/3200
+    //Serial.println("angular Position: ");
+    Serial.print(angularPosition);
+    Serial.print("\t");
     
-    angularVelocity = angularPosition/0.025; //rad per sec -> 0.05 is 50 ms
-    Serial.println("angular velocity: ");
-    Serial.println(angularVelocity);
+    angularVelocity = (1000*angularPosition)/period; //rad per sec -> 0.05 is 50 ms
+    //Serial.println("angular velocity: ");
+    Serial.print(angularVelocity);
+    Serial.print("\t");
+    
 
   
 
@@ -89,7 +98,9 @@ void loop() {
     }
     while(millis() < time_now + period){
         //Serial.println("Amount of time to wait: ");
-        //Serial.println(time_now+period-millis());
+       // Serial.print(time_now+period-millis());
+        //Serial.print("\t");
     }
+    Serial.println();
     
 }
