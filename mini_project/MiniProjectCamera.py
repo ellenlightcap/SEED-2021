@@ -130,4 +130,25 @@ while loop:
         rawCapture.truncate(0)
     #exits loop when ctl+c is pressed
     except KeyboardInterrupt:
-        loop = False
+        lightMode = input('Enter D for dark conditions or B for bright conditions. Enter Q to quit program')
+        #Changes camera settings for different light levels
+        if (lightMode == 'D' or lightMode == 'd'):
+            camera.iso = 600
+            sleep(5)
+            camera.shutter_speed = camera.exposure_speed
+            camera.exposure_mode = 'off'
+            g = camera.awb_gains
+            camera.awb_mode = 'off'
+            camera.awb_gains = g
+            print ("Low light configurations set")
+        elif (lightMode == 'B' or lightMode == 'b'):
+            camera.iso = 100
+            sleep(2)
+            camera.shutter_speed = camera.exposure_speed
+            camera.exposure_mode = 'off'
+            g = camera.awb_gains
+            camera.awb_mode = 'off'
+            camera.awb_gains = g
+            print("High light configurations set")
+        elif (lightMode == 'Q' or lightMode == 'q'):
+            loop = False
