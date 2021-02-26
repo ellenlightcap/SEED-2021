@@ -133,8 +133,10 @@ while loop:
         lightMode = input('Enter D for dark conditions or B for bright conditions. Enter Q to quit program')
         #Changes camera settings for different light levels
         if (lightMode == 'D' or lightMode == 'd'):
+            camera.resolution = (1280, 720)
+            camera.framerate = 10
             camera.iso = 600
-            sleep(5)
+            time.sleep(5)
             camera.shutter_speed = camera.exposure_speed
             camera.exposure_mode = 'off'
             g = camera.awb_gains
@@ -142,8 +144,10 @@ while loop:
             camera.awb_gains = g
             print ("Low light configurations set")
         elif (lightMode == 'B' or lightMode == 'b'):
+            camera.resolution = (1280, 720)
+            camera.framerate = 30
             camera.iso = 100
-            sleep(2)
+            time.sleep(2)
             camera.shutter_speed = camera.exposure_speed
             camera.exposure_mode = 'off'
             g = camera.awb_gains
