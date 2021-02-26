@@ -105,6 +105,8 @@ while loop:
             
         #converting to grayscale
         grayImg = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+        cv2.imshow('image', grayImg)
+        cv2.waitKey(1)
     
         #detecting markers
         (corners, ids, rejected) = aruco.detectMarkers(grayImg, arucoDict, parameters=arucoParam)
