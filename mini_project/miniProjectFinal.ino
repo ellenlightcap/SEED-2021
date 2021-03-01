@@ -87,21 +87,21 @@ void loop() {
 }
 
 // callback for received data
-void receiveData(int byteCount){
-    int i=0;
+void receiveData(int byteCount){// This function reads in data from the PI to the arduino
+    int i=0; 
     
     while(Wire.available()) {
-     data[i] = Wire.read();
-     if(data[i]==5)break;
-     Serial.print(data[i]);
-     Serial.print(' ');
+     data[i] = Wire.read(); //This line takes the data from the wire to the arduino
+     if(data[i]==5)break; //For this protocol in order to not get ISR timeouts, if the value is 5, this means the value being sent is for the read request, therfore we don't want to document anything
+     //Serial.print(data[i]);//These print functions are for troubleshooting. These functions with 
+     //Serial.print(' ');
      i++;
     }
     //Serial.println(' ');
     i--;
-    if(data[i]!= 5 && i < 31 && i > 0){
+    if(data[i]!= 5 && i < 31 && i > 0){ //If we overflowed, underflowed, or got our incorrect offset value, then we don't update the r value
       Serial.print("<- New data ");
-      r=data[i]*(PI/2);
+      r=data[i]*(PI/2); //This converts the value read in into radians and updates it for the controller
       Serial.println(r);
     }
 }
@@ -117,9 +117,10 @@ void sendData(){
   number=int((y*40));
   Serial.println(number);
   */
-  if (y == 0){
+  //This if else statement gets the current radial position and sends it back to the PI. This method is a bit hamfisted to convert the float into a byte. This will need improving in future projects
+  if (y < 0.3){
     number = 0;
-  }else if(y > 0 && y < 2){
+  }else if(y > 0. && y < 2){
     number = 1;
   }else if( y < 4){
     number = 2;
