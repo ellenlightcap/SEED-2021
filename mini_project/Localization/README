@@ -1,0 +1,7 @@
+In this file is the code used for 4.3 and 4.4 of the mini project handout. While they were separate parts and the code for each was done separately, 
+the for each of them was put together in one file. This code was then passed onto the Simulation and Control person (Dahlia) to find complete her part of the project.
+This code uses the encoder.h library to read in from the encoder to then output the position of the wheel. This task was done during assignment 2 as 
+well, however using encoder.h made this task much easier and more reliable. The other part of this code turns the motor on to spin the wheel.
+This is done by defining the output pins that were attached to the arduino from the motor and then using ditigal and analog write to 
+turn the output to high or low when the switch was turned on. This code was also passed onto to other members of the group as this code was then
+modified to turn the output high or low depending on when the wheel needed to be turning or when the wheel needed to stop turning.
