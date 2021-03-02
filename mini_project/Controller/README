@@ -1,0 +1,6 @@
+Description of code:
+Simulation.ino: Arduino code that creates the open loop step response(4.6)
+controlAndSimMatlab.m : Matlab code for both the open loop and closed loop experiments(4.6 & 4.7)
+controllerCode : Arduino code implementing the controller and doing the closed loop step experiment (4.7)
+controllerModel.slx : Simulink model for controller and closed feedback loop (4.7)
+transferfunctionmodel.slx : Simulink model to determine transfer function/open loop step response experiment (4.7)
