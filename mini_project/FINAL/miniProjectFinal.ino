@@ -17,15 +17,15 @@ Encoder myEnc(2, 6);
 #define SF 12
 
 
-float kp = 0.62;//0.6275;
-float ki = 0.19;//0.024, increased a lot cuz we want wind up -> ensures we don't stop before the position we want -> increase for better transient response
-float integrator = 0;
-float e = 0;
-float ts = 0;
+float kp = 5;//pwm/rad
+float ki = 0.18;//pwm/(rad*sec)
+float integrator = 0; //radians*seconds
+float e = 0; //radians
+float ts = 0; //milliseconds
 float tc = millis();
-float r = 0; 
-float y = 0;
-int u = 0; //controller (volts)
+float r = 0; //radians
+float y = 0; //radians but first encoder counts
+int u = 0; //controller (volts/pwm)
 
 
 void setup() {
@@ -55,30 +55,41 @@ void setup() {
 }
 
 void loop() {
-      y=myEnc.read();
-      y = (y/1600)*PI;
-      e=r-y;//difference in position or error
-      //Serial.print(y);
-      //Serial.print("\t");
-      integrator = integrator + ts*e; //might need to divide by 1000
-      u = kp*e+ki*integrator*e; //controller(voltage)
-      Serial.println(u);
-     
-      u = u/7.9 *255; //this may be funky but shouldn't matter too much
+      y=myEnc.read(); //encoder counts
+      y = (y/1600)*PI; // radians
+      //Serial.println(y); //testing
+      
+      //steady state error
+      e=r-y;//difference in position/steady state error(radians)
+      
+      //Serial.print(y); //testing
+      //Serial.print("\t"); //testing
+      
+      //integrator
+      integrator = integrator + (ts/1000)*e; //radians*second
+      
+      //implementing controller
+      u = kp*e+ki*integrator; //pwm
+      u = u/7.9 * 255; //pwm with respect to the supplied voltage
+      //Serial.println(u);//testing
+      
       //check if u is overflowing (greater or less than 255)
       if(u > 255){
         u=255;
-      }else if(u < -255){
-        u = 255;
-      }
-      analogWrite(M1PWM, abs(u));//255 is 5V
-      
-      if(u<0){
+        analogWrite(M1PWM, u);//255 is 5V
+        digitalWrite(M1DIR, HIGH); //one way
+      }else if(u<0){
+        u = u*-1;
+        if(u > 255){
+          u=255;
+        }
+        analogWrite(M1PWM, u);//if u is less than 0 go the other direction
         digitalWrite(M1DIR, LOW);
-      }else{
+      }
+      else{
+        analogWrite(M1PWM, u);//positive and CW
         digitalWrite(M1DIR, HIGH);
       }
-
       ts = millis() - tc;
       tc = millis();
       //Serial.print(tc);
