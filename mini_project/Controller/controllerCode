@@ -14,13 +14,13 @@ Encoder myEnc(2, 6);
 
 float kp = 5;//pwm/rad
 float ki = 0.18;//pwm/(rad*sec)
-float integrator = 0;
-float e = 0;
-float ts = 0;
+float integrator = 0; //radians*seconds
+float e = 0; //radians
+float ts = 0; //milliseccond
 float tc = millis();
-float r = PI; //pi
-float y = 0;
-int u = 0; //controller (volts)
+float r = PI; //radians
+float y = 0; //radians
+int u = 0; //controller (volts/pwm)
 
 void setup() {
   // put your setup code here, to run once:
