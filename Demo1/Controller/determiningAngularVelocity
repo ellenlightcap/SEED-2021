@@ -1,0 +1,111 @@
+//this code is for determining the angular velocity of each wheel so we can start to determine transfer functions and implement the controller
+//at this moments, encoder 2 is not working
+
+
+#include <Encoder.h>
+Encoder myEnc1(2, 6);
+Encoder myEnc2(3, 7);
+
+#define D2 4
+#define M1DIR 7
+#define M2DIR 8
+#define M1PWM 9
+#define M2PWM 10
+#define SF 12
+
+int period = 50;
+
+float startM1=0;
+float startM2=0;
+float finalM1=0;
+float finalM2=0;
+float difference1=0;
+float difference2=0;
+float angularVelocity1 = 0;
+float angularVelocity2 = 0;
+float angularPosition1 = 0;
+float angularPosition2 = 0;
+float time_now = 0;
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(250000);
+
+  pinMode(D2, OUTPUT);
+  pinMode(M1DIR, OUTPUT);
+  pinMode(M2DIR,OUTPUT);
+  pinMode(M1PWM, OUTPUT);
+  pinMode(M2PWM, OUTPUT);
+  pinMode(SF, INPUT);
+  digitalWrite(D2,HIGH);
+  
+  myEnc1.write(0);
+  myEnc2.write(0);
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  time_now = millis();
+
+  // starting positions
+  startM1 = myEnc1.read();
+  startM2 = myEnc2.read();
+  //Serial.print(startM1);
+  //Serial.print("\t");
+  Serial.print(startM2);
+  Serial.print("\t");
+
+  if (time_now < 1000){
+    analogWrite(M1PWM, 0);
+  analogWrite(M2PWM, 0); //little less cuz it rotates faster
+  digitalWrite(M2DIR, HIGH);
+  digitalWrite(M1DIR, HIGH);
+  }else{
+  analogWrite(M1PWM, 150); //2.9412 V
+  analogWrite(M2PWM, 150); //2.9412 V
+  digitalWrite(M2DIR, HIGH);
+  digitalWrite(M1DIR, HIGH);
+  }
+  // final positions 
+  finalM1 = myEnc1.read();
+  finalM2 = myEnc2.read();
+  //Serial.print(finalM1);
+  //Serial.print("\t");
+  //Serial.print(finalM2);
+  //Serial.print("\t");
+
+  //differences
+  difference1 = finalM1 - startM1;
+  difference2 = finalM2 - startM2;
+  //Serial.print(difference1);
+  //Serial.print("\t");
+  //Serial.print(difference2);
+  //Serial.print("\t");
+
+  //angular Positons
+  angularPosition1 = (difference1*2*PI)/3200;
+  angularPosition2 = (difference2*2*PI)/3200;
+  //Serial.print(angularPosition1);
+  //Serial.print("\t");
+  //Serial.print(angularPosition2);
+  //Serial.print("\t");
+
+  //angular Velocity
+  angularVelocity1 = (1000*angularPosition1)/period;
+  angularVelocity2 = (1000*angularPosition2)/period;
+  //Serial.print(angularVelocity1);
+  //Serial.print("\t");
+  //Serial.print(angularVelocity2);
+  //Serial.print("\t");
+
+  if (millis() > time_now + period){
+    Serial.println("Error: main took longer than the desired time");
+  }
+  while(millis() < time_now + period){
+    
+  }
+  Serial.println();
+  
+
+}
