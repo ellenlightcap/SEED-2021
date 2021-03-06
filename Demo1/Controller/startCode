@@ -1,0 +1,43 @@
+//just gets motor to run in a semi straight line
+//check encoders to see if they are the same
+//kk this not good
+
+#include <Encoder.h>
+Encoder myEnc1(2, 6);
+Encoder myEnc2(3, 7);
+
+#define D2 4
+#define M1DIR 7
+#define M2DIR 8
+#define M1PWM 9
+#define M2PWM 10
+#define SF 12
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(250000);
+
+  pinMode(D2, OUTPUT);
+  pinMode(M1DIR, OUTPUT);
+  pinMode(M2DIR,OUTPUT);
+  pinMode(M1PWM, OUTPUT);
+  pinMode(M2PWM, OUTPUT);
+  pinMode(SF, INPUT);
+  digitalWrite(D2,HIGH);
+  
+  myEnc1.write(0);
+  myEnc2.write(0);
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+ 
+
+  analogWrite(M1PWM, 150);
+  analogWrite(M2PWM, 142); //little less cuz it rotates faster
+  digitalWrite(M2DIR, HIGH);
+  digitalWrite(M1DIR, HIGH);
+  
+
+}
