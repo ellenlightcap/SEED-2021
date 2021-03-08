@@ -4,7 +4,7 @@
 
 #include <Encoder.h>
 Encoder myEnc1(2, 6);
-Encoder myEnc2(3, 7);
+Encoder myEnc2(3, 5);
 
 #define D2 4
 #define M1DIR 7
@@ -29,7 +29,7 @@ float time_now = 0;
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(250000);
+  Serial.begin(19200);
 
   pinMode(D2, OUTPUT);
   pinMode(M1DIR, OUTPUT);
@@ -51,8 +51,8 @@ void loop() {
   // starting positions
   startM1 = myEnc1.read();
   startM2 = myEnc2.read();
-  //Serial.print(startM1);
-  //Serial.print("\t");
+  Serial.print(startM1);
+  Serial.print("\t");
   Serial.print(startM2);
   Serial.print("\t");
 
@@ -62,42 +62,42 @@ void loop() {
   digitalWrite(M2DIR, HIGH);
   digitalWrite(M1DIR, HIGH);
   }else{
-  analogWrite(M1PWM, 150); //2.9412 V
-  analogWrite(M2PWM, 150); //2.9412 V
+  analogWrite(M1PWM, 255); //2.9412 V
+  analogWrite(M2PWM, 255); //2.9412 V
   digitalWrite(M2DIR, HIGH);
   digitalWrite(M1DIR, HIGH);
   }
   // final positions 
   finalM1 = myEnc1.read();
   finalM2 = myEnc2.read();
-  //Serial.print(finalM1);
-  //Serial.print("\t");
-  //Serial.print(finalM2);
-  //Serial.print("\t");
+  Serial.print(finalM1);
+  Serial.print("\t");
+  Serial.print(finalM2);
+  Serial.print("\t");
 
   //differences
   difference1 = finalM1 - startM1;
   difference2 = finalM2 - startM2;
-  //Serial.print(difference1);
-  //Serial.print("\t");
-  //Serial.print(difference2);
-  //Serial.print("\t");
+  Serial.print(difference1);
+  Serial.print("\t");
+  Serial.print(difference2);
+  Serial.print("\t");
 
   //angular Positons
   angularPosition1 = (difference1*2*PI)/3200;
   angularPosition2 = (difference2*2*PI)/3200;
-  //Serial.print(angularPosition1);
-  //Serial.print("\t");
-  //Serial.print(angularPosition2);
-  //Serial.print("\t");
+  Serial.print(angularPosition1);
+  Serial.print("\t");
+  Serial.print(angularPosition2);
+  Serial.print("\t");
 
   //angular Velocity
   angularVelocity1 = (1000*angularPosition1)/period;
   angularVelocity2 = (1000*angularPosition2)/period;
-  //Serial.print(angularVelocity1);
-  //Serial.print("\t");
-  //Serial.print(angularVelocity2);
-  //Serial.print("\t");
+  Serial.print(angularVelocity1);
+  Serial.print("\t");
+  Serial.print(angularVelocity2);
+  Serial.print("\t");
 
   if (millis() > time_now + period){
     Serial.println("Error: main took longer than the desired time");
