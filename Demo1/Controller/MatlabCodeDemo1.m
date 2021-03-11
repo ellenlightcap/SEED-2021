@@ -2,7 +2,9 @@
 % My Demo 1 design process:
 % 
 % # Determine the angular velocity of each wheel 
-% # ITEM2
+% # Convert angular velocity to gain
+% # Determine the transfer functions
+% #Create PI controllers and find kp and ki values
 % 
 
 %% Determining wheel one trasnfer function
