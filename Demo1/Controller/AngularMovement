@@ -1,0 +1,130 @@
+//Moves at like 180 degrees
+
+#include <Encoder.h>
+Encoder myEnc1(2, 6);
+Encoder myEnc2(3, 5);
+
+#define D2 4
+#define M1DIR 7
+#define M2DIR 8
+#define M1PWM 9
+#define M2PWM 10
+#define SF 12
+
+float kp_right = 5.5; //615.39//pwm/rad
+float ki_right = .309; //309.49//pwm/(rad*sec)
+float kp_left = 6.96; //696.27
+float ki_left = .394448; //394.448
+float integratorRight = 0; //rad*sec
+float integratorLeft = 0; //rad*sec
+float eRight = 0; // steady state error
+float eLeft = 0; //steady state error
+float ts = 0;
+float tc = millis();
+float feet = 2*PI;
+float yRight = 0; //actual (radians)
+float yLeft = 0; //actual
+int uRight = 0; //controller right
+int uLeft = 0; //controller left
+
+
+
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(250000);
+
+  pinMode(2, INPUT);
+  pinMode(3, INPUT);
+  pinMode(5, INPUT);
+  pinMode(6, INPUT);
+
+  pinMode(D2, OUTPUT);
+  pinMode(M1DIR, OUTPUT);
+  pinMode(M2DIR,OUTPUT);
+  pinMode(M1PWM, OUTPUT);
+  pinMode(M2PWM, OUTPUT);
+  pinMode(SF, INPUT);
+  digitalWrite(D2,HIGH);
+  
+  myEnc1.write(0);
+  myEnc2.write(0);
+
+}
+
+void loop() {
+
+  //actual distance
+  yRight = myEnc1.read();
+  Serial.print(yRight);
+  Serial.print("\t");
+  yLeft = myEnc2.read();
+  yRight = (yRight/1600)*PI; //radians
+  yLeft = (yLeft/1600)*PI; //radians
+  //yRight = (yRight/24)*5.75;//feet
+  //yLeft = (yLeft/24)*5.75;//feet
+
+  //error between wanted and actual
+  eRight = feet - yRight;
+  eLeft = (feet*1) - yLeft;
+  
+  //integrator shit
+  integratorRight = integratorRight + (ts/1000)*eRight;
+  integratorLeft = integratorLeft + (ts/1000)*eLeft;
+
+
+  //implementing controller
+  uRight = kp_right*eRight + ki_right*integratorRight;
+  uLeft = kp_left*eLeft + ki_left*integratorLeft;
+
+  Serial.print(uRight);
+  Serial.print("\t");
+  //Serial.print(uLeft);
+  //Serial.println("\t");
+
+  
+  uRight = (uRight/7.8) * 255;
+  uLeft = (uLeft/7.8) * 255;
+
+  Serial.print(uRight);
+  Serial.print("\t");
+  //Serial.print(uLeft);
+  Serial.println("\t");
+
+  if(uRight > 255){
+        uRight=255;
+        analogWrite(M1PWM, uRight);//255 is 5V
+        digitalWrite(M1DIR, LOW); //one way
+      }else if(uRight<0){
+        uRight = uRight*-1;
+        if(uRight > 255){
+          uRight=255;
+        }
+        analogWrite(M1PWM, uRight);//if u is less than 0 go the other direction
+        digitalWrite(M1DIR, HIGH);
+      }
+      else{
+        analogWrite(M1PWM, uRight);//positive and CW
+        digitalWrite(M1DIR, LOW);
+      }
+
+      if(uLeft > 255){
+        uLeft=255;
+        analogWrite(M2PWM, uLeft);//255 is 5V
+        digitalWrite(M2DIR, LOW); //one way
+      }else if(uLeft<0){
+        uLeft = uLeft*-1;
+        if(uLeft > 255){
+          uLeft=255;
+        }
+        analogWrite(M2PWM, uLeft);//if u is less than 0 go the other direction
+        digitalWrite(M2DIR, HIGH);
+      }
+      else{
+        analogWrite(M2PWM, uLeft);//positive and CW
+        digitalWrite(M2DIR, LOW);
+      }
+      ts = millis() - tc;
+      tc = millis();
+
+}
