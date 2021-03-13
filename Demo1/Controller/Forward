@@ -1,4 +1,4 @@
-//Moves for 5 feet
+//Moves for 7 feet
 
 #include <Encoder.h>
 Encoder myEnc1(2, 6);
@@ -11,17 +11,17 @@ Encoder myEnc2(3, 5);
 #define M2PWM 10
 #define SF 12
 
-float kp_right = 5.5; //615.39//pwm/rad
-float ki_right = .309; //309.49//pwm/(rad*sec)
-float kp_left = 6.96; //696.27
-float ki_left = .394448; //394.448
+float kp_right = 1.3; //615.39//pwm/rad //13.72
+float ki_right = 0.0309; //309.49//pwm/(rad*sec)//.777
+float kp_left = 1.18; //696.27// 11.8178
+float ki_left = 0.039; //394.448 //0.66949
 float integratorRight = 0; //rad*sec
 float integratorLeft = 0; //rad*sec
 float eRight = 0; // steady state error
 float eLeft = 0; //steady state error
 float ts = 0;
 float tc = millis();
-float feet = 5;
+float feet = 7;
 float yRight = 0; //actual (radians)
 float yLeft = 0; //actual
 int uRight = 0; //controller right
@@ -64,13 +64,29 @@ void loop() {
   yRight = (yRight/24)*5.75;//feet
   yLeft = (yLeft/24)*5.75;//feet
 
+  Serial.print(yRight);
+  Serial.print("\t");
+  Serial.print(yLeft);
+  Serial.print("\t");
+
   //error between wanted and actual
   eRight = feet - yRight;
   eLeft = (feet*-1) - yLeft;
+
+  Serial.print(eRight);
+  Serial.print("\t");
+  Serial.print(eLeft);
+  Serial.print("\t");
+
   
   //integrator shit
   integratorRight = integratorRight + (ts/1000)*eRight;
   integratorLeft = integratorLeft + (ts/1000)*eLeft;
+
+  Serial.print(integratorRight);
+  Serial.print("\t");
+  Serial.print(integratorLeft);
+  Serial.print("\t");
 
 
   //implementing controller
@@ -79,16 +95,16 @@ void loop() {
 
   Serial.print(uRight);
   Serial.print("\t");
-  //Serial.print(uLeft);
-  //Serial.println("\t");
+  Serial.print(uLeft);
+  Serial.println("\t");
 
   
-  uRight = (uRight/7.8) * 255;
-  uLeft = (uLeft/7.8) * 255;
+  uRight = (uRight/7.7) * 255;
+  uLeft = (uLeft/7.7) * 255;
 
   Serial.print(uRight);
   Serial.print("\t");
-  //Serial.print(uLeft);
+  Serial.print(uLeft);
   Serial.println("\t");
 
   if(uRight > 255){
@@ -126,5 +142,10 @@ void loop() {
       }
       ts = millis() - tc;
       tc = millis();
+      
+      Serial.print("time: ");
+      Serial.print(ts);
+
+      Serial.println();
 
 }
