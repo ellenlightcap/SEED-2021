@@ -1,4 +1,4 @@
-//Moves for 7 feet
+//Moves for 5 feet
 
 #include <Encoder.h>
 Encoder myEnc1(2, 6);
@@ -11,9 +11,9 @@ Encoder myEnc2(3, 5);
 #define M2PWM 10
 #define SF 12
 
-float kp_right = 1.3; //615.39//pwm/rad //13.72
-float ki_right = 0.0309; //309.49//pwm/(rad*sec)//.777
-float kp_left = 1.18; //696.27// 11.8178
+float kp_right = 1.5; //615.39//pwm/rad //13.72
+float ki_right = 0.01; //309.49//pwm/(rad*sec)//.777
+float kp_left = 1.25; //696.27// 11.8178
 float ki_left = 0.039; //394.448 //0.66949
 float integratorRight = 0; //rad*sec
 float integratorLeft = 0; //rad*sec
@@ -99,8 +99,8 @@ void loop() {
   Serial.println("\t");
 
   
-  uRight = (uRight/7.7) * 255;
-  uLeft = (uLeft/7.7) * 255;
+  uRight = (uRight/7.6) * 255;
+  uLeft = (uLeft/7.6) * 255;
 
   Serial.print(uRight);
   Serial.print("\t");
