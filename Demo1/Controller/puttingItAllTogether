@@ -11,10 +11,10 @@ Encoder myEnc2(3, 5);
 #define M2PWM 10
 #define SF 12
 
-float kp_right = 1.3; //615.39//pwm/rad
+float kp_right = 5.5; //615.39//pwm/rad
 float ki_right = .309; //309.49//pwm/(rad*sec)
-float kp_left = 1.18; //696.27
-float ki_left = .394448; //394.448
+float kp_left = 6.96; //696.27
+float ki_left = .394; //394.448
 float integratorRight = 0; //rad*sec
 float integratorLeft = 0; //rad*sec
 float eRight = 0; // steady state error
@@ -26,7 +26,7 @@ float yLeft = 0; //actual
 int uRight = 0; //controller right
 int uLeft = 0; //controller left
 float feet = 1;
-float angle = PI;
+float angle = 2*PI;
 
 
 void setup() {
@@ -54,22 +54,24 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.println(angle);
-  Serial.println(feet);
+  //Serial.println(angle);
+  //Serial.println(feet);
   rotate(angle);
   while( (yRight < angle) && (yLeft < angle)){
     rotate(angle);
     //Serial.println(yRight);
     //Serial.println(yLeft);
   }
+  analogWrite(M1PWM, 0);
+  analogWrite(M2PWM, 0);
   delay(1000);
+  angle=0;
   myEnc1.write(0);
   myEnc2.write(0);
   forward(feet);
   while((yRight < feet) && (yLeft < feet)){
     forward(feet);
   }
-  angle=0;
   feet=0;
   myEnc1.write(0);
   myEnc2.write(0);
@@ -94,7 +96,7 @@ float rotate(float x){
   yRight = (yRight/1600)*PI; //radians
   yLeft = (yLeft/1600)*PI; //radians
 
-  //Serial.println(yRight);
+  Serial.println(yRight);
   //Serial.println(yLeft);
 
   //error between wanted and actual
@@ -162,8 +164,8 @@ float forward(float y){
   yRight = (yRight/24)*5.75;//feet
   yLeft = (yLeft/24)*5.75;//feet
 
-  Serial.println(yRight);
-  Serial.println(yLeft);
+  //Serial.println(yRight);
+  //Serial.println(yLeft);
 
   //error between wanted and actual
   eRight = y - yRight;
