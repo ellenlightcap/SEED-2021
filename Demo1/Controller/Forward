@@ -11,9 +11,14 @@ Encoder myEnc2(3, 5);
 #define M2PWM 10
 #define SF 12
 
-#define ft2meters 0.3048;
+#define FT2METERS 0.3048; //meters in one foot
+#define PERIOD 50
+#define RADIUS  0.0745 //meters
+#define RAD2DEGREE 0.0174533 //deg per radian
+#define SATURATION_POINT 0.5 //need to look into more
+#define BATTERY_VOLTS 7.7
 
-double kp_right = 1.5; //615.39//pwm/rad //13.72
+double kp_right = 1.5; //615.39//pwm/rad //13.72 //probably need to make the kp's smaller now
 double ki_right = 0.01; //309.49//pwm/(rad*sec)//.777
 double kp_left = 1.25; //696.27// 11.8178
 double ki_left = 0.039; //394.448 //0.66949
@@ -26,12 +31,24 @@ double tc = millis(); //current time
 double feet = 7;
 double positionWanted = 0;
 
-float yRight = 0; //actual (radians)
-float yLeft = 0; //actual
+double yRight = 0; //actual (radians)
+double yLeft = 0; //actual
 int uRight = 0; //controller right
 int uLeft = 0; //controller left
-
-
+double oldyRight = 0;
+double oldyLeft = 0;
+double leftAV = 0;
+double rightAV = 0;
+double speedR = 0;
+double speedL = 0;
+double posR = 0;
+double posL = 0;
+double wantedSpeedR = 0;
+double wantedSpeedL = 0;
+double speedErrorR = 0;
+double speedErrorL = 0;
+double totalErrorR=0;
+double totalErrorL = 0;
 
 
 void setup() {
@@ -58,103 +75,91 @@ void setup() {
 
 void loop() {
    tc = millis();
-   positionWanted = feet*ft2meters; //set desired position to meters
-   
-   //samples angular velocity
+   positionWanted = feet*FT2METERS; //set desired position to meters
    
 
-  //actual distance
-  yRight = myEnc1.read();
-  Serial.print(yRight);
-  Serial.print("\t");
-  yLeft = myEnc2.read();
-  yRight = (yRight/1600)*PI; //radians
-  yLeft = (yLeft/1600)*PI; //radians
-  yRight = (yRight/24)*5.75;//feet
-  yLeft = (yLeft/24)*5.75;//feet
-
-  Serial.print(yRight);
-  Serial.print("\t");
-  Serial.print(yLeft);
-  Serial.print("\t");
-
-  //error between wanted and actual
-  eRight = feet - yRight;
-  eLeft = (feet*-1) - yLeft;
-
-  Serial.print(eRight);
-  Serial.print("\t");
-  Serial.print(eLeft);
-  Serial.print("\t");
-
+  //where its at
+  yRight = ((double)myEnc1.read() * 360)/3200;
+  yLeft = ((double)myEnc2.read() * 360)/3200;
   
-  //integrator shit
-  integratorRight = integratorRight + (ts/1000)*eRight;
-  integratorLeft = integratorLeft + (ts/1000)*eLeft;
-
-  Serial.print(integratorRight);
-  Serial.print("\t");
-  Serial.print(integratorLeft);
-  Serial.print("\t");
-
-
-  //implementing controller
-  uRight = kp_right*eRight + ki_right*integratorRight;
-  uLeft = kp_left*eLeft + ki_left*integratorLeft;
-
-  Serial.print(uRight);
-  Serial.print("\t");
-  Serial.print(uLeft);
-  Serial.println("\t");
-
+  //calculates angular velocity
+  rightAV = (1000* (yRight - oldyRight))/PERIOD;
+  leftAV = (1000 * (yLeft - oldyLeft))/PERIOD;
   
-  uRight = (uRight/7.6) * 255;
-  uLeft = (uLeft/7.6) * 255;
-
-  Serial.print(uRight);
-  Serial.print("\t");
-  Serial.print(uLeft);
-  Serial.println("\t");
-
-  if(uRight > 255){
-        uRight=255;
-        analogWrite(M1PWM, uRight);//255 is 5V
-        digitalWrite(M1DIR, LOW); //one way
-      }else if(uRight<0){
-        uRight = uRight*-1;
-        if(uRight > 255){
-          uRight=255;
-        }
-        analogWrite(M1PWM, uRight);//if u is less than 0 go the other direction
-        digitalWrite(M1DIR, HIGH);
+  //actual forward velocity
+  speedR = RADIUS * RAD2DEG * rightAV;
+  speedL = RADIUS * RAD2DEG * leftAV;
+  
+  //actual position
+  posR = (((double)myEnc1.read() * 2*PI)/3200) * RADIUS;
+  posL = (-1*((((double)myEnc2.read() * 2*PI)/3200) * RADIUS);
+  
+  //steady state error
+  eRight = positionWanted - posR;
+  eLeft = positionWanted - posL;
+  
+  //speed wanted
+  wantedSpeedR = eRight*kp_right;
+  wantedSpeedL = eLeft*kp_left;
+  
+  //check that speed hasn't gone past saturation point
+  if (wantedSpeedR > SATURATION_POINT) {
+    wantedSpeedR = SATURATION_POINT;
+    }else if ( wantedSpeedR < -SATURATION_POINT){
+    wantedSpeedR = -SATURATION_POINT;
+    }
+    
+  if (wantedSpeedL > SATURATION_POINT) {
+    wantedSpeedL = SATURATION_POINT;
+    }else if ( wantedSpeedL < -SATURATION_POINT){
+    wantedSpeedL = -SATURATION_POINT;
+    }
+    
+    //error in speed
+    speedErrorR = wantedSpeedR - speedR;
+    speedErrorL = wantedSpeedL - speedL;
+    
+    //total error
+    totalErrorR = ((speedErrorR * PERIOD)/1000)+totalErrorR;
+    totalErrorL = ((speedErrorL * PERIOD)/1000)+totalErrorL;
+    
+    uRight = (totalErrorR * ki_right);
+    uLeft = (totalErrorL * ki_left);
+    
+    if(uRight > BATTERY_VOLTS){
+      uRight = BATTERY_VOLTS;
+     }else if (uRight < (-1*BATTERY_VOLTS){
+     uRight = -1*BATERRY_VOLTS;
+     }
+     
+     if(uLeft > BATTERY_VOLTS){
+      uLeft = BATTERY_VOLTS;
+     }else if (uLeft < (-1*BATTERY_VOLTS){
+     uLeft = -1*BATERRY_VOLTS;
+     }
+     
+     if(uRight > 0){
+     digitalWrite(M1DIR, LOW); //might need to change
+     }else{
+     digitalWrite(M1DIR, HIGH);
+     
+     if(uLeft > 0{
+     digitalWrite(M2DIR, LOW); //might need to change
+     }else{
+     digitalWrite(M2DIR, HIGH);
+     
+     uRight = (uRight*255)/BATTERY_VOLTS;
+     uLeft = (uLeft*255)/BATTERY_VOLTS;
+     analogWrite(M1PWM, uRight);
+     analogWrite(M2PWM, uLeft);
+     
+     oldyRight = yRight;
+     oldyLeft = yLeft;
+     
+     if(millis() > (tc + PERIOD){
+      Serial.println("Error");
       }
-      else{
-        analogWrite(M1PWM, uRight);//positive and CW
-        digitalWrite(M1DIR, LOW);
-      }
-
-      if(uLeft > 255){
-        uLeft=255;
-        analogWrite(M2PWM, uLeft);//255 is 5V
-        digitalWrite(M2DIR, LOW); //one way
-      }else if(uLeft<0){
-        uLeft = uLeft*-1;
-        if(uLeft > 255){
-          uLeft=255;
-        }
-        analogWrite(M2PWM, uLeft);//if u is less than 0 go the other direction
-        digitalWrite(M2DIR, HIGH);
-      }
-      else{
-        analogWrite(M2PWM, uLeft);//positive and CW
-        digitalWrite(M2DIR, LOW);
-      }
-      ts = millis() - tc;
-      tc = millis();
       
-      Serial.print("time: ");
-      Serial.print(ts);
-
-      Serial.println();
+      while(millis() < (tc+PERIOD));
 
 }
