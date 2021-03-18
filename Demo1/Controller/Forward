@@ -87,12 +87,12 @@ void loop() {
   leftAV = (1000 * (yLeft - oldyLeft))/PERIOD;
   
   //actual forward velocity
-  speedR = RADIUS * RAD2DEG * rightAV;
-  speedL = RADIUS * RAD2DEG * leftAV;
+  speedR = RADIUS * RAD2DEGREE * rightAV;
+  speedL = RADIUS * RAD2DEGREE * leftAV;
   
   //actual position
   posR = (((double)myEnc1.read() * 2*PI)/3200) * RADIUS;
-  posL = (-1*((((double)myEnc2.read() * 2*PI)/3200) * RADIUS);
+  posL = (-1*(((double)myEnc2.read() * 2*PI)/3200) * RADIUS);
   
   //steady state error
   eRight = positionWanted - posR;
@@ -128,25 +128,27 @@ void loop() {
     
     if(uRight > BATTERY_VOLTS){
       uRight = BATTERY_VOLTS;
-     }else if (uRight < (-1*BATTERY_VOLTS){
-     uRight = -1*BATERRY_VOLTS;
+     }else if (uRight < (-1*BATTERY_VOLTS)){
+     uRight = -1*BATTERY_VOLTS;
      }
      
      if(uLeft > BATTERY_VOLTS){
       uLeft = BATTERY_VOLTS;
-     }else if (uLeft < (-1*BATTERY_VOLTS){
-     uLeft = -1*BATERRY_VOLTS;
+     }else if (uLeft < (-1*BATTERY_VOLTS)){
+     uLeft = -1*BATTERY_VOLTS;
      }
      
      if(uRight > 0){
      digitalWrite(M1DIR, LOW); //might need to change
      }else{
      digitalWrite(M1DIR, HIGH);
+     }
      
-     if(uLeft > 0{
+     if(uLeft > 0){
      digitalWrite(M2DIR, LOW); //might need to change
      }else{
      digitalWrite(M2DIR, HIGH);
+     }
      
      uRight = (uRight*255)/BATTERY_VOLTS;
      uLeft = (uLeft*255)/BATTERY_VOLTS;
@@ -156,7 +158,7 @@ void loop() {
      oldyRight = yRight;
      oldyLeft = yLeft;
      
-     if(millis() > (tc + PERIOD){
+     if(millis() > (tc + PERIOD)){
       Serial.println("Error");
       }
       
