@@ -11,17 +11,21 @@ Encoder myEnc2(3, 5);
 #define M2PWM 10
 #define SF 12
 
-float kp_right = 1.5; //615.39//pwm/rad //13.72
-float ki_right = 0.01; //309.49//pwm/(rad*sec)//.777
-float kp_left = 1.25; //696.27// 11.8178
-float ki_left = 0.039; //394.448 //0.66949
-float integratorRight = 0; //rad*sec
-float integratorLeft = 0; //rad*sec
-float eRight = 0; // steady state error
-float eLeft = 0; //steady state error
-float ts = 0;
-float tc = millis();
-float feet = 7;
+#define ft2meters 0.3048;
+
+double kp_right = 1.5; //615.39//pwm/rad //13.72
+double ki_right = 0.01; //309.49//pwm/(rad*sec)//.777
+double kp_left = 1.25; //696.27// 11.8178
+double ki_left = 0.039; //394.448 //0.66949
+double integratorRight = 0; //rad*sec
+double integratorLeft = 0; //rad*sec
+double eRight = 0; // steady state error
+double eLeft = 0; //steady state error
+double ts = 0;
+double tc = millis(); //current time
+double feet = 7;
+double positionWanted = 0;
+
 float yRight = 0; //actual (radians)
 float yLeft = 0; //actual
 int uRight = 0; //controller right
@@ -53,6 +57,11 @@ void setup() {
 }
 
 void loop() {
+   tc = millis();
+   positionWanted = feet*ft2meters; //set desired position to meters
+   
+   //samples angular velocity
+   
 
   //actual distance
   yRight = myEnc1.read();
