@@ -9,7 +9,7 @@ import glob
 
 #detects aruco markers in an image and the angle
 def getAngle(img, height, width):
-    #converting to grayscale
+    #converting image to grayscale
     grayImg = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     
     #detecting markers
@@ -17,7 +17,7 @@ def getAngle(img, height, width):
     arucoParam = aruco.DetectorParameters_create()
     (corners, ids, rejected) = aruco.detectMarkers(grayImg, arucoDict, parameters=arucoParam)
 
-    #finding angle MEASURE THESE AGAIN
+    #finding angle
     FIELDOFVIEW = 54
     corners = np.array(corners)
 
@@ -26,7 +26,7 @@ def getAngle(img, height, width):
         for marker in range(0,ids.size):
             mark = np.array(corners[marker][0])
 
-            #x coordinate of center of marker
+            #getting x coordinate of center of marker
             x = ((mark[1][0] - mark[0][0])/2) + mark[0][0]
             print('corner zero ',mark[0][0],' ', mark[0][1])
             print('corner one ',mark[1][0], ' ', mark[1][1])
@@ -51,6 +51,7 @@ def getAngle(img, height, width):
             #calculating angle
             angle = (FIELDOFVIEW/2)*(((width/2)-dist)/(width/2))*sideSign
             print("Marker Angle: ",angle)
+            return angle
 
     #get warning about comparing to None... should probably fix that
     else:
