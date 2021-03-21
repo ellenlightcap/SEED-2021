@@ -51,10 +51,10 @@ if cal:
         cv2.waitKey(1000)
         cv2.destroyAllWindows()
         rawCapture.truncate(0)
-
+    #sends pictures through calibration function
     ret, mtx, dist, rvecs, tvecs = cf.calibrateCam()
 
-    #saving calibration results for later use
+    #saving calibration results in files for later use
     saveRet = open("RET","wb")
     np.save(saveRet, ret)
     saveRet.close
@@ -75,7 +75,7 @@ if cal:
     np.save(saveTvecs, tvecs)
     saveTvecs.close
 
-#Loading calibration settings
+#Loading calibration settings from files
 readRet = open("RET", "rb")
 ret = np.load(readRet)
 readRet.close
