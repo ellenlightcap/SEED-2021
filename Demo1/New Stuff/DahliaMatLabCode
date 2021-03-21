@@ -1,0 +1,83 @@
+%% Transfer Function Start Over
+% TF start over
+close all
+Data1 = csvread("EllenDemoValues_roh.csv");
+X1 = Data1(:,1);
+Y1 = Data1(:,2);
+
+Data2 = csvread("EllenDemoValues_phi.csv");
+X2 = Data2(:,1);
+Y2 = Data2(:,2);
+
+K1=1.8;
+Sigma1=50;
+
+K2=.5;
+Sigma2=50;
+
+open_system('startOverModel');
+out=sim('startOverModel');
+
+figure(1);
+plot(out.roh);
+xlabel("Time");
+ylabel("Forward Velocity");
+figure(2);
+plot(X1,Y1);
+figure(3);
+plot(out.phi);
+xlabel("Time");
+ylabel("Angular Velocity");
+figure(4);
+plot(X2,Y2);
+
+%% Inner Controller Start Over
+% controller start over
+K1=1.8;
+Sigma1=50;
+
+K2=.5;
+Sigma2=50;
+
+open_system('innerLoopController');
+out=sim('innerLoopController');
+
+figure(1);
+plot(out.roh);
+xlabel("Time");
+ylabel("Forward Velocity");
+%P = 0
+%I= 5.0251
+figure(2);
+plot(out.phi);
+xlabel("Time");
+ylabel("Angular Velocity");
+%P = 0
+%I = 18.0904
+
+%% Outer Controller
+% Controller StartOver
+K1=1.8;
+Sigma1=50;
+
+
+K2=.5;
+Sigma2=50;
+
+open_system('outerLoopControl');
+out=sim('outerLoopControl');
+
+figure(1);
+plot(out.forwardPosition);
+xlabel("Time: ");
+ylabel("Forward Position");
+%P = 2.349
+%D = 0;
+
+figure(2);
+plot(out.angularPosition);
+xlabel("Time:");
+ylabel("Angular Position");
+%P = 1.8636
+%D = 0
+
