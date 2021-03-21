@@ -1,0 +1,29 @@
+%%I sent you the files you will need to run this code. Save them in the same folder you save all your matlab stuff to
+
+
+close all
+Data1 = csvread("EllenDemoValues_roh.csv");
+X1 = Data1(:,1);
+Y1 = Data1(:,2);
+
+Data2 = csvread("EllenDemoValues_phi.csv");
+X2 = Data2(:,1);
+Y2 = Data2(:,2);
+
+K1=1.8;
+Sigma1=50;
+
+K2=.5;
+Sigma2=50;
+
+open_system('EllenMotorSim');
+out=sim('EllenMotorSim');
+
+figure(1);
+plot(out.simout1);
+figure(2);
+plot(X1,Y1);
+figure(3);
+plot(out.simout2);
+figure(4);
+plot(X2,Y2);
