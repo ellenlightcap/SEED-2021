@@ -2,12 +2,12 @@
 % TF start over
 close all
 Data1 = csvread("EllenDemoValues_roh.csv");
-X1 = Data1(:,1);
-Y1 = Data1(:,2);
+X1 = Data1(:,1); //roh
+Y1 = Data1(:,2); //time
 
 Data2 = csvread("EllenDemoValues_phi.csv");
-X2 = Data2(:,1);
-Y2 = Data2(:,2);
+X2 = Data2(:,1); //roh
+Y2 = Data2(:,2); //time
 
 K1=1.8;
 Sigma1=50;
