@@ -1,0 +1,198 @@
+#include <Encoder.h>
+Encoder myEncR(2, 6);
+Encoder myEncL(3, 5);
+
+#define D2 4
+#define MRDIR 7
+#define MLDIR 8
+#define MRPWM 9
+#define MLPWM 10
+#define SF 12
+
+#define KP_RHO 0
+#define KI_RHO 5.0251 //5.0251
+#define KP_PHI 0
+#define KI_PHI 18.0904 //18.0904
+
+#define KPO_RHO 2.349
+#define KDO_RHO 0
+#define KPO_PHI 1.8636
+#define KDO_PHI 0
+
+#define RAD2DEG 0.0174533
+#define METERSPERFOOT 0.3048
+#define MAX_VOLT 7.3
+
+
+//robot specifications
+#define RADIUS 0.0746125
+#define DISTANCE 0.29845
+
+
+//movement specifications
+#define FEET 3
+#define ANGLE 0
+
+
+double period = 50;
+
+double newRightPosition = 0;
+double newLeftPosition = 0;
+double oldRightPosition = 0;
+double oldLeftPosition= 0;
+double positionForward = 0;
+double positionAngular = 0;
+double velocityRight = 0;
+double velocityLeft = 0;
+double velocityForward = 0;
+double velocityAngular = 0;
+double desiredForwardVelocity = 0;
+double desiredAngularVelocity = 0;
+double errorForwardVelocity = 0;
+double totalErrorForwardVelocity = 0;
+double errorAngularVelocity = 0;
+double totalErrorAngularVelocity = 0;
+
+double desiredForwardPosition = 0;
+double desiredAngularPosition = 0;
+double newForwardPositionError = 0;
+double newAngularPositionError = 0;
+double oldForwardPositionError = 0;
+double oldAngularPositionError = 0;
+double changeForwardError = 0;
+double changeAngularError = 0;
+double v_bar = 0;
+double v_delta = 0;
+double volt_right =0;
+double volt_left =0;
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(250000);
+
+  pinMode(2, INPUT);
+  pinMode(3, INPUT);
+  pinMode(5, INPUT);
+  pinMode(6, INPUT);
+
+  pinMode(D2, OUTPUT);
+  pinMode(MRDIR, OUTPUT);
+  pinMode(MLDIR,OUTPUT);
+  pinMode(MRPWM, OUTPUT);
+  pinMode(MLPWM, OUTPUT);
+  pinMode(SF, INPUT);
+  digitalWrite(D2,HIGH);
+
+  
+  
+  myEncR.write(0);
+  myEncL.write(0);
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  static unsigned long current_Time = 0;
+  current_Time = millis();
+  Serial.print(current_Time);
+  Serial.print("\t");
+
+  
+ 
+  if(current_Time > 1000){ 
+    desiredForwardVelocity = ((-1)*10*RADIUS*PI)/5;
+    desiredAngularVelocity = (10*PI)/5;
+  }
+
+  
+
+  //determine position of wheels in degrees
+  newRightPosition = ((double)myEncR.read()*2*PI)/3200; //radians
+  newLeftPosition = -1*((double)myEncL.read()*2*PI)/3200; //radians
+
+
+  //determine position of roomba as a whole
+  positionForward = ((newRightPosition + newLeftPosition)*RADIUS)/2; //radian * meters
+  positionAngular = ((newRightPosition - newLeftPosition)*RADIUS)/DISTANCE; //radians
+
+  //speed of each wheel
+  velocityRight = (1000*(newRightPosition - oldRightPosition))/period; //radians/Second
+  velocityLeft = (1000*(newLeftPosition - oldLeftPosition))/period; //radians/second
+
+  //speed of entire roomba
+  velocityForward = (RADIUS*(velocityRight+velocityLeft))/2; //radians*meter/seconds
+  velocityAngular = (RADIUS*(velocityRight-velocityLeft))/DISTANCE; //radians/second
+
+  //rho inner loop controller
+  errorForwardVelocity = desiredForwardVelocity - velocityForward;
+  totalErrorForwardVelocity +=(errorForwardVelocity*period)/1000;
+  v_bar = (totalErrorForwardVelocity*KI_RHO)+(errorForwardVelocity*KP_RHO);
+
+  //phi inner loop controller
+  errorAngularVelocity = desiredAngularVelocity - velocityAngular;
+  totalErrorAngularVelocity += (errorAngularVelocity*period)/1000;
+  v_delta = (totalErrorAngularVelocity*KI_PHI)+(errorAngularVelocity*KP_PHI);
+  
+  Serial.print(v_bar);
+  Serial.print("\t");
+
+  Serial.print(v_delta);
+  Serial.print("\t");
+
+  volt_right = (v_bar + v_delta)/2;
+  volt_left = (v_bar - v_delta)/2;
+
+  Serial.print(volt_right);
+  Serial.print("\t");
+
+  Serial.print(volt_left);
+  Serial.print("\t");
+
+  volt_right = (volt_right/MAX_VOLT)*255;
+  volt_left = ((volt_left/MAX_VOLT)*255);
+ 
+  if (volt_right < 0){
+    digitalWrite(MRDIR, HIGH);
+  }else{
+    digitalWrite(MRDIR, LOW);
+  }
+  volt_right = abs(volt_right);
+  if(volt_right > 255){
+     volt_right = 255;
+  }
+
+  if (volt_left < 0){
+    digitalWrite(MLDIR, HIGH);
+  }else{
+    digitalWrite(MLDIR, LOW);
+  }
+  volt_left = abs(volt_left);
+  if(volt_left > 255){
+     volt_left = 255;
+  }
+
+  Serial.print(volt_right);
+  Serial.print("\t");
+
+  Serial.print(volt_left);
+  Serial.print("\t");
+  Serial.println();
+
+
+  analogWrite(MRPWM, abs(volt_right));
+  analogWrite(MLPWM, abs(volt_left));
+
+
+  oldRightPosition = newRightPosition;
+  oldLeftPosition = newLeftPosition;
+
+  
+
+  if (millis() > current_Time + period){
+    Serial.println("Error: main took longer than the desired time");
+  }
+  while(millis() < current_Time + period){
+    
+  }
+
+}
