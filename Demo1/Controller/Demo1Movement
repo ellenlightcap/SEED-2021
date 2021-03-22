@@ -1,0 +1,240 @@
+//what we demoed with
+
+#include <Encoder.h>
+Encoder myEnc1(2, 6);
+Encoder myEnc2(3, 5);
+
+#define D2 4
+#define M1DIR 7
+#define M2DIR 8
+#define M1PWM 9
+#define M2PWM 10
+#define SF 12
+#define MAXVOLT 7.2
+
+double kp_right = 6.5; //615.39//pwm/rad //13.72//1.5
+double ki_right = 0.75; //309.49//pwm/(rad*sec)//.777
+double kp_left = 6.2; //696.27// 11.8178//6.9
+double ki_left = 1; //394.448 //0.66949
+float integratorRight = 0; //rad*sec
+float integratorLeft = 0; //rad*sec
+float eRight = 0; // steady state error
+float eLeft = 0; //steady state error
+float ts = 0;
+float tc = millis();
+float yRight = 0; //actual (radians)
+float yLeft = 0; //actual
+int uRight = 0; //controller right
+int uLeft = 0; //controller left
+float feet = 1;
+float angle = -2*PI;
+
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(250000);
+
+  pinMode(2, INPUT);
+  pinMode(3, INPUT);
+  pinMode(5, INPUT);
+  pinMode(6, INPUT);
+
+  pinMode(D2, OUTPUT);
+  pinMode(M1DIR, OUTPUT);
+  pinMode(M2DIR,OUTPUT);
+  pinMode(M1PWM, OUTPUT);
+  pinMode(M2PWM, OUTPUT);
+  pinMode(SF, INPUT);
+  digitalWrite(D2,HIGH);
+  
+  myEnc1.write(0);
+  myEnc2.write(0);
+
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  //Serial.println(angle);
+  //Serial.println(feet);
+  rotate(angle);
+  while( (abs(yRight) < abs(angle)) && (abs(yLeft) < abs(angle))){
+    rotate(angle);
+    //Serial.println(yRight);
+    //Serial.println(yLeft);
+  }
+  analogWrite(M1PWM, 0);
+  analogWrite(M2PWM, 0);
+  delay(1000);
+  angle=0;
+  myEnc1.write(0);
+  myEnc2.write(0);
+  integratorRight = 0; //rad*sec
+  integratorLeft = 0; //rad*sec
+  eRight = 0; // steady state error
+  eLeft = 0;
+  yRight = 0; //actual (radians)
+  yLeft = 0; //actual
+  uRight = 0; //controller right
+  uLeft = 0;
+  forward(feet);
+  while((yRight < feet) && (yLeft < feet)){
+    forward(feet);
+  }
+  feet=0;
+  myEnc1.write(0);
+  myEnc2.write(0);
+  analogWrite(M1PWM, 0);
+  analogWrite(M2PWM, 0);
+  integratorRight = 0; //rad*sec
+  integratorLeft = 0; //rad*sec
+  eRight = 0; // steady state error
+  eLeft = 0;
+  yRight = 0; //actual (radians)
+  yLeft = 0; //actual
+  uRight = 0; //controller right
+  uLeft = 0;
+
+}
+
+float rotate(float x){
+  //while( (yRight < angle) && (yLeft < angle)){
+  
+  yRight = myEnc1.read();
+  yLeft = myEnc2.read();
+  yRight = (yRight/1600)*PI; //radians
+  yLeft = (yLeft/1600)*PI; //radians
+
+  Serial.println(yRight);
+  //Serial.println(yLeft);
+
+  //error between wanted and actual
+  eRight = x - yRight;
+  eLeft = x - yLeft;
+  
+  //integrator shit
+  integratorRight = integratorRight + (ts/1000)*eRight;
+  integratorLeft = integratorLeft + (ts/1000)*eLeft;
+
+
+  //implementing controller
+  uRight = kp_right*eRight + ki_right*integratorRight;
+  uLeft = kp_left*eLeft + ki_left*integratorLeft;
+
+  uRight = (uRight/7.8) * 255;
+  uLeft = (uLeft/7.8) * 255;
+
+
+  if(uRight > 255){
+        uRight=255;
+        analogWrite(M1PWM, uRight);//255 is 5V
+        digitalWrite(M1DIR, LOW); //one way
+      }else if(uRight<0){
+        uRight = uRight*-1;
+        if(uRight > 255){
+          uRight=255;
+        }
+        analogWrite(M1PWM, uRight);//if u is less than 0 go the other direction
+        digitalWrite(M1DIR, HIGH);
+      }
+      else{
+        analogWrite(M1PWM, uRight);//positive and CW
+        digitalWrite(M1DIR, LOW);
+      }
+
+      if(uLeft > 255){
+        uLeft=255;
+        analogWrite(M2PWM, uLeft);//255 is 5V
+        digitalWrite(M2DIR, LOW); //one way
+      }else if(uLeft<0){
+        uLeft = uLeft*-1;
+        if(uLeft > 255){
+          uLeft=255;
+        }
+        analogWrite(M2PWM, uLeft);//if u is less than 0 go the other direction
+        digitalWrite(M2DIR, HIGH);
+      }
+      else{
+        analogWrite(M2PWM, uLeft);//positive and CW
+        digitalWrite(M2DIR, LOW);
+      }
+      ts = millis() - tc;
+      tc = millis();
+  //}
+}
+
+float forward(float y){
+  //while((yRight < feet) && (yLeft < feet)){
+  
+  static double ts = 0;
+  static double tc = millis();
+  yRight = myEnc1.read();
+  Serial.print(yRight);
+  Serial.print("\t");
+  yLeft = myEnc2.read();
+  yRight = (yRight/1600)*PI; //radians
+  yLeft = (yLeft/1600)*PI; //radians
+  yRight = (yRight/24)*5.75;//feet
+  yLeft = (yLeft/24)*5.75;//feet
+
+
+  //error between wanted and actual
+  eRight = y - yRight;
+  eLeft = (y*-1) - yLeft;
+
+  Serial.print(eRight);
+  Serial.print("\t");
+  Serial.print(eLeft);
+  Serial.print("\t");
+
+  
+  //integrator shit
+  integratorRight = integratorRight + (ts/1000)*eRight;
+  integratorLeft = integratorLeft + (ts/1000)*eLeft;
+
+
+  //implementing controller
+  uRight = kp_right*eRight + ki_right*integratorRight;
+  uLeft = kp_left*eLeft + ki_left*integratorLeft;
+
+
+  
+  uRight = (uRight/MAXVOLT) * 255;
+  uLeft = (uLeft/MAXVOLT) * 255;
+
+
+  if (uRight < 0){
+    digitalWrite(M1DIR, HIGH);
+  }else{
+    digitalWrite(M1DIR, LOW);
+  }
+  uRight = abs(uRight);
+  if(uRight > 255){
+     uRight = 255;
+     integratorRight = 0;
+  }
+
+  if (uLeft < 0){
+    digitalWrite(M2DIR, HIGH);
+  }else{
+    digitalWrite(M2DIR, LOW);
+  }
+  uLeft = abs(uLeft);
+  if(uLeft > 255){
+     uLeft = 255;
+     integratorLeft = 0;
+  }
+ 
+  Serial.print(uRight);
+  Serial.print("\t");
+  Serial.print(uLeft);
+  Serial.print("\t");
+  Serial.println();
+
+  analogWrite(M1PWM, abs(uRight));
+  analogWrite(M2PWM, abs(uLeft));
+  ts = millis() - tc;
+  tc = millis();
+      
+
+}
