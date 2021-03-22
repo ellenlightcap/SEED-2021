@@ -13,22 +13,21 @@ Encoder myEnc2(3, 5);
 
 #define FT2METERS 0.3048; //meters in one foot
 #define PERIOD 50
-#define RADIUS  0.0745 //meters
+#define RADIUS 0.0746125
 #define RAD2DEGREE 0.0174533 //deg per radian
 #define SATURATION_POINT 0.5 //need to look into more
-#define BATTERY_VOLTS 7.7
+#define BATTERY_VOLTS 7.2
 
-double kp_right = 1.5; //615.39//pwm/rad //13.72 //probably need to make the kp's smaller now
-double ki_right = 0.01; //309.49//pwm/(rad*sec)//.777
-double kp_left = 1.25; //696.27// 11.8178
-double ki_left = 0.039; //394.448 //0.66949
+double kp_right = 0.6; //615.39//pwm/rad //13.72 //probably need to make the kp's smaller now
+double ki_right = 30; //309.49//pwm/(rad*sec)//.777
+double kp_left = 0.6; //696.27// 11.8178
+double ki_left = 39; //394.448 //0.66949
 double integratorRight = 0; //rad*sec
 double integratorLeft = 0; //rad*sec
 double eRight = 0; // steady state error
 double eLeft = 0; //steady state error
-double ts = 0;
-double tc = millis(); //current time
-double feet = 7;
+double ts = 0; 
+double feet = 3;
 double positionWanted = 0;
 
 double yRight = 0; //actual (radians)
@@ -74,9 +73,12 @@ void setup() {
 }
 
 void loop() {
-   tc = millis();
-   positionWanted = feet*FT2METERS; //set desired position to meters
-   
+   static unsigned long tc = 0;
+   tc=millis();
+
+   if(tc > 1000){
+    positionWanted = feet*FT2METERS; //set desired position to meters
+   }
 
   //where its at
   yRight = ((double)myEnc1.read() * 360)/3200;
@@ -88,7 +90,7 @@ void loop() {
   
   //actual forward velocity
   speedR = RADIUS * RAD2DEGREE * rightAV;
-  speedL = RADIUS * RAD2DEGREE * leftAV;
+  speedL = -1*RADIUS * RAD2DEGREE * leftAV;
   
   //actual position
   posR = (((double)myEnc1.read() * 2*PI)/3200) * RADIUS;
@@ -123,8 +125,8 @@ void loop() {
     totalErrorR = ((speedErrorR * PERIOD)/1000)+totalErrorR;
     totalErrorL = ((speedErrorL * PERIOD)/1000)+totalErrorL;
     
-    uRight = (totalErrorR * ki_right);
-    uLeft = (totalErrorL * ki_left);
+    uRight = (totalErrorR * ki_right)+(speedErrorR*kp_right);
+    uLeft = (totalErrorL * ki_left)+(speedErrorL*kp_left);
     
     if(uRight > BATTERY_VOLTS){
       uRight = BATTERY_VOLTS;
@@ -145,9 +147,9 @@ void loop() {
      }
      
      if(uLeft > 0){
-     digitalWrite(M2DIR, LOW); //might need to change
+     digitalWrite(M2DIR, HIGH); //might need to change
      }else{
-     digitalWrite(M2DIR, HIGH);
+     digitalWrite(M2DIR, LOW);
      }
      
      uRight = (uRight*255)/BATTERY_VOLTS;
