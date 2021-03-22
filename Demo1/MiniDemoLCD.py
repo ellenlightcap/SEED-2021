@@ -18,8 +18,13 @@ def LCDDisplayAngle(angle):
     lcd.clear()
     lcd.color = [100, 100, 100]
     #time.sleep(1)
-    #Due to the unique nature of the CV2 library and the dynamic data typing of Python, the type casts are added to ensure compatibility for whatever is passed through from the camera
-    lcd.message = "MRKR Found " + "\nAngle: " + string(round(float(angle),2))
+    #This branching statment checks we are getting a real value from the camera. If not, we assume it doesn't see anything
+    if angle != None:
+        #Due to the unique nature of the CV2 library and the dynamic data typing of Python, the type casts are added to 
+        #ensure compatibility for whatever is passed through from the camera
+        lcd.message = "MRKR Found " + "\nAngle: " + string(round(float(angle),2))
+    else:
+        lcd.message = "NO MRKR!"
     lcd.color = [0, 0, 0]
     #time.sleep(1)
     return 1
