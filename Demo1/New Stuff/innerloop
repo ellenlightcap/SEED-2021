@@ -26,7 +26,7 @@ Encoder myEncL(3, 5);
 
 //robot specifications
 #define RADIUS 0.0746125
-#define DISTANCE 0.29845
+#define DISTANCE 0.32 //double check
 
 
 //movement specifications
@@ -100,8 +100,8 @@ void loop() {
   
  
   if(current_Time > 1000){ 
-    desiredForwardVelocity = ((-1)*10*RADIUS*PI)/5;
-    desiredAngularVelocity = (10*PI)/5;
+    desiredForwardVelocity = .5;//meters per second
+    desiredAngularVelocity = 1;//radians per second
   }
 
   
@@ -110,10 +110,17 @@ void loop() {
   newRightPosition = ((double)myEncR.read()*2*PI)/3200; //radians
   newLeftPosition = -1*((double)myEncL.read()*2*PI)/3200; //radians
 
+  Serial.print(newRightPosition);
+  Serial.print("\t");
+  Serial.print(newLeftPosition);
+  Serial.print("\t");
+
 
   //determine position of roomba as a whole
   positionForward = ((newRightPosition + newLeftPosition)*RADIUS)/2; //radian * meters
   positionAngular = ((newRightPosition - newLeftPosition)*RADIUS)/DISTANCE; //radians
+
+  
 
   //speed of each wheel
   velocityRight = (1000*(newRightPosition - oldRightPosition))/period; //radians/Second
@@ -121,16 +128,20 @@ void loop() {
 
   //speed of entire roomba
   velocityForward = (RADIUS*(velocityRight+velocityLeft))/2; //radians*meter/seconds
+  Serial.print(velocityForward);
+  Serial.print("\t");
   velocityAngular = (RADIUS*(velocityRight-velocityLeft))/DISTANCE; //radians/second
+  Serial.print(velocityAngular);
+  Serial.print("\t");
 
   //rho inner loop controller
   errorForwardVelocity = desiredForwardVelocity - velocityForward;
-  totalErrorForwardVelocity +=(errorForwardVelocity*period)/1000;
+  totalErrorForwardVelocity =totalErrorForwardVelocity + (errorForwardVelocity*period)/1000;
   v_bar = (totalErrorForwardVelocity*KI_RHO)+(errorForwardVelocity*KP_RHO);
 
   //phi inner loop controller
   errorAngularVelocity = desiredAngularVelocity - velocityAngular;
-  totalErrorAngularVelocity += (errorAngularVelocity*period)/1000;
+  totalErrorAngularVelocity = totalErrorAngularVelocity + (errorAngularVelocity*period)/1000;
   v_delta = (totalErrorAngularVelocity*KI_PHI)+(errorAngularVelocity*KP_PHI);
   
   Serial.print(v_bar);
@@ -138,6 +149,7 @@ void loop() {
 
   Serial.print(v_delta);
   Serial.print("\t");
+
 
   volt_right = (v_bar + v_delta)/2;
   volt_left = (v_bar - v_delta)/2;
@@ -162,20 +174,16 @@ void loop() {
   }
 
   if (volt_left < 0){
-    digitalWrite(MLDIR, HIGH);
-  }else{
     digitalWrite(MLDIR, LOW);
+  }else{
+    digitalWrite(MLDIR, HIGH);
   }
   volt_left = abs(volt_left);
   if(volt_left > 255){
      volt_left = 255;
   }
 
-  Serial.print(volt_right);
-  Serial.print("\t");
 
-  Serial.print(volt_left);
-  Serial.print("\t");
   Serial.println();
 
 
