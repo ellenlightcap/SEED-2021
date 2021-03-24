@@ -9,28 +9,28 @@ Encoder myEncL(3, 5);
 #define MLPWM 10
 #define SF 12
 
-#define KP_RHO 0
+#define KP_RHO 0 
 #define KI_RHO 5.0251 //5.0251
 #define KP_PHI 0
 #define KI_PHI 18.0904 //18.0904
 
-#define KPO_RHO 2.349
-#define KDO_RHO 0
-#define KPO_PHI 1.8636
-#define KDO_PHI 0
+#define KPO_RHO 2.349 //2.349
+#define KDO_RHO 5 //0
+#define KPO_PHI 1.8636 //1.8636
+#define KDO_PHI 5 //0
 
 #define RAD2DEG 0.0174533
 #define METERSPERFOOT 0.3048
-#define MAX_VOLT 7.3
+#define MAX_VOLT 7.4
 
 
 //robot specifications
 #define RADIUS 0.0746125
-#define DISTANCE 0.32 //double check
+#define DISTANCE 0.29845
 
 
 //movement specifications
-#define FEET 3
+#define FEET 2
 #define ANGLE 0
 
 
@@ -82,8 +82,6 @@ void setup() {
   pinMode(MLPWM, OUTPUT);
   pinMode(SF, INPUT);
   digitalWrite(D2,HIGH);
-
-  
   
   myEncR.write(0);
   myEncL.write(0);
@@ -98,15 +96,12 @@ void loop() {
   Serial.print("\t");
 
   
- 
   if(current_Time > 1000){ 
-    desiredForwardVelocity = .5;//meters per second
-    desiredAngularVelocity = 1;//radians per second
+    desiredForwardPosition = FEET*METERSPERFOOT; //meters
+    desiredAngularPosition = ANGLE; //radians
   }
 
-  
 
-  //determine position of wheels in degrees
   newRightPosition = ((double)myEncR.read()*2*PI)/3200; //radians
   newLeftPosition = -1*((double)myEncL.read()*2*PI)/3200; //radians
 
@@ -120,8 +115,6 @@ void loop() {
   positionForward = ((newRightPosition + newLeftPosition)*RADIUS)/2; //radian * meters
   positionAngular = ((newRightPosition - newLeftPosition)*RADIUS)/DISTANCE; //radians
 
-  
-
   //speed of each wheel
   velocityRight = (1000*(newRightPosition - oldRightPosition))/period; //radians/Second
   velocityLeft = (1000*(newLeftPosition - oldLeftPosition))/period; //radians/second
@@ -134,9 +127,32 @@ void loop() {
   Serial.print(velocityAngular);
   Serial.print("\t");
 
-  //rho inner loop controller
+  //rho outer loop controller 
+  newForwardPositionError = desiredForwardPosition - positionForward;
+  changeForwardError = ((newForwardPositionError - oldForwardPositionError)*1000)/period;
+  oldForwardPositionError = newForwardPositionError;
+  desiredForwardVelocity = (newForwardPositionError*KPO_RHO)+(changeForwardError * KDO_RHO);
+  //if (desiredForwardVelocity > 5){
+    //desiredForwardVelocity = 5;
+  //}else if(desiredForwardVelocity < -5){
+    //desiredForwardVelocity = -5;
+  //}
+  
+
+  //phi outer loop controller
+  newAngularPositionError = desiredAngularPosition - positionAngular;
+  changeAngularError = ((newAngularPositionError - oldAngularPositionError)*1000)/period;
+  oldAngularPositionError = newAngularPositionError;
+  desiredAngularVelocity = (newAngularPositionError*KPO_PHI)+(changeAngularError * KDO_PHI);
+ // if (desiredAngularVelocity > 180){
+ //   desiredForwardVelocity = 180;
+ // }else if(desiredForwardVelocity < -180){
+  //  desiredForwardVelocity = -180;
+  //}
+
+   //rho inner loop controller
   errorForwardVelocity = desiredForwardVelocity - velocityForward;
-  totalErrorForwardVelocity =totalErrorForwardVelocity + (errorForwardVelocity*period)/1000;
+  totalErrorForwardVelocity = totalErrorForwardVelocity + (errorForwardVelocity*period)/1000;
   v_bar = (totalErrorForwardVelocity*KI_RHO)+(errorForwardVelocity*KP_RHO);
 
   //phi inner loop controller
