@@ -34,7 +34,7 @@ Encoder myEncL(3, 5);
 #define ANGLE 0
 
 
-double period = 1000;
+double period = 50;
 
 double newRightPosition = 0;
 double newLeftPosition = 0;
@@ -96,17 +96,19 @@ void loop() {
   Serial.print("\t");
 
   
- 
   if(current_Time > 1000){ 
-    desiredForwardPosition = (-1)*FEET*METERSPERFOOT;
+    desiredForwardPosition = FEET*METERSPERFOOT;
     desiredAngularPosition = ANGLE;
   }
 
-  
 
-  //determine position of wheels in degrees
   newRightPosition = ((double)myEncR.read()*2*PI)/3200; //radians
   newLeftPosition = -1*((double)myEncL.read()*2*PI)/3200; //radians
+
+  Serial.print(newRightPosition);
+  Serial.print("\t");
+  Serial.print(newLeftPosition);
+  Serial.print("\t");
 
 
   //determine position of roomba as a whole
@@ -119,7 +121,11 @@ void loop() {
 
   //speed of entire roomba
   velocityForward = (RADIUS*(velocityRight+velocityLeft))/2; //radians*meter/seconds
+  Serial.print(velocityForward);
+  Serial.print("\t");
   velocityAngular = (RADIUS*(velocityRight-velocityLeft))/DISTANCE; //radians/second
+  Serial.print(velocityAngular);
+  Serial.print("\t");
 
   //rho outer loop controller 
   newForwardPositionError = desiredForwardPosition - positionForward;
@@ -144,14 +150,14 @@ void loop() {
   //  desiredForwardVelocity = -180;
   //}
 
-  //rho inner loop controller
+   //rho inner loop controller
   errorForwardVelocity = desiredForwardVelocity - velocityForward;
-  totalErrorForwardVelocity +=(errorForwardVelocity*period)/1000;
+  totalErrorForwardVelocity =totalErrorForwardVelocity + (errorForwardVelocity*period)/1000;
   v_bar = (totalErrorForwardVelocity*KI_RHO)+(errorForwardVelocity*KP_RHO);
 
   //phi inner loop controller
   errorAngularVelocity = desiredAngularVelocity - velocityAngular;
-  totalErrorAngularVelocity += (errorAngularVelocity*period)/1000;
+  totalErrorAngularVelocity = totalErrorAngularVelocity + (errorAngularVelocity*period)/1000;
   v_delta = (totalErrorAngularVelocity*KI_PHI)+(errorAngularVelocity*KP_PHI);
   
   Serial.print(v_bar);
@@ -159,6 +165,7 @@ void loop() {
 
   Serial.print(v_delta);
   Serial.print("\t");
+
 
   volt_right = (v_bar + v_delta)/2;
   volt_left = (v_bar - v_delta)/2;
@@ -183,25 +190,20 @@ void loop() {
   }
 
   if (volt_left < 0){
-    digitalWrite(MLDIR, HIGH);
-  }else{
     digitalWrite(MLDIR, LOW);
+  }else{
+    digitalWrite(MLDIR, HIGH);
   }
   volt_left = abs(volt_left);
   if(volt_left > 255){
      volt_left = 255;
   }
 
-  Serial.print(volt_right);
-  Serial.print("\t");
 
-  Serial.print(volt_left);
-  Serial.print("\t");
   Serial.println();
 
 
   analogWrite(MRPWM, abs(volt_right));
-  delay(1000);
   analogWrite(MLPWM, abs(volt_left));
 
 
