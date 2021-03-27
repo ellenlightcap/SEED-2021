@@ -1,0 +1,21 @@
+%
+% This script loads in data from 
+%
+data = importdata('ForwardTest128(50mssampletime).txt');
+rhodot = data(:,11);
+time = .05*(0:length(rhodot)-1);
+figure(1)
+plot(time,rhodot);
+ylabel('in/sec')
+xlabel('sec')
+K=14.75/128;
+sigma = 10;
+sys = tf(K*sigma,[1 sigma]);
+[y,ts]=step(sys*128);
+hold on
+plot(ts+1,y);
+hold off
+
+C = tf([2  20],[1 0]);
+figure(2)
+step(feedback(sys*C,1))
