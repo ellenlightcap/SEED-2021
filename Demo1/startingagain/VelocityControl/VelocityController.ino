@@ -26,10 +26,10 @@ void VelocityController() {
   }
 
   if (M2PWM_value>0) {
-    digitalWrite(M2DIR,LOW);
+    digitalWrite(M2DIR,HIGH);
   }
   else{
-    digitalWrite(M2DIR,HIGH);
+    digitalWrite(M2DIR,LOW);
   }
   
   M1PWM_value = abs(M1PWM_value);
