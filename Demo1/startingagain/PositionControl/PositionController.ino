@@ -23,7 +23,7 @@ void Controller() {
         phi_error_old = phi_error;
    }
    if (POSITION_CONTROL) {
-         rho_error = rho_setopint - rho;
+         rho_error = rho_setpoint - rho;
          rho_dot_setpoint = Kp_rho*rho_error + Kd_rho*(rho_error - rho_error_old)/((float)period/1000);
          rho_error_old = rho_error;
    }

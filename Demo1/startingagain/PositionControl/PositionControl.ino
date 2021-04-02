@@ -36,9 +36,9 @@ float Ki_rho_dot = 40;
 float Kp_rho = 0;
 float Kd_rho = 0;
 float I_rho_dot = 0; // forward velocity integrator
-float rho_dot_setpoint = 10; // in/s
+float rho_dot_setpoint = 0; // in/s
 float rho_setpoint=0;
-bool POSITION_CONTROL = flase;
+bool POSITION_CONTROL = false;
 // Controller Parameters
 // angular velocity controller
 float Kp_phi_dot = 20;  // PWM counts per rad/s error
@@ -47,7 +47,7 @@ float Kp_phi = 1.17;
 float Kd_phi = 0.6;
 float I_phi_dot=0; // angular velocity integrator
 float phi_dot_setpoint = 0; // rad/s
-float phi_setpoint=0;
+float phi_setpoint=1;
 bool ANGULAR_POSITION_CONTROL = true;
  
 
