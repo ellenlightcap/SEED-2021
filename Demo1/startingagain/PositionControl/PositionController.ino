@@ -74,6 +74,6 @@ void Controller() {
  
   Serial.print(M1PWM_value);
   Serial.print("\t");
-  Serial.print(M1PWM_value);
+  Serial.print(M2PWM_value);
   Serial.print("\t");  
 }

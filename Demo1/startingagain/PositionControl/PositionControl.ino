@@ -37,7 +37,7 @@ float Kp_rho = 1.17;
 float Kd_rho = 0.6;
 float I_rho_dot = 0; // forward velocity integrator
 float rho_dot_setpoint = 0; // in/s
-float rho_setpoint=0;
+float rho_setpoint=12;
 bool POSITION_CONTROL = true;
 // Controller Parameters
 // angular velocity controller
@@ -47,7 +47,7 @@ float Kp_phi = 1.17;
 float Kd_phi = 0.6;
 float I_phi_dot=0; // angular velocity integrator
 float phi_dot_setpoint = 0; // rad/s
-float phi_setpoint=1;
+float phi_setpoint=0;
 bool ANGULAR_POSITION_CONTROL = true;
  
 
