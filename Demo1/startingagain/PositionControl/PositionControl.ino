@@ -122,10 +122,6 @@ void loop() {
   // Controller Calculations
   Controller();
 
-  Serial.print(M1PWM_value);
-  Serial.print("\t");
-  Serial.print(M1PWM_value);
-  Serial.print("\t");
   Serial.print(ANGULAR_POSITION_CONTROL);
   Serial.print("\t");
   Serial.print(POSITION_CONTROL);
