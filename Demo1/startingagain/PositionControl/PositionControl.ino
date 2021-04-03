@@ -33,12 +33,12 @@ float distance = 12;//inches
 // Forward velocity controller
 float Kp_rho_dot = 4;  // PWM counts per in/s error
 float Ki_rho_dot = 40;
-float Kp_rho = 0;
-float Kd_rho = 0;
+float Kp_rho = 1.17;
+float Kd_rho = 0.6;
 float I_rho_dot = 0; // forward velocity integrator
 float rho_dot_setpoint = 0; // in/s
 float rho_setpoint=0;
-bool POSITION_CONTROL = false;
+bool POSITION_CONTROL = true;
 // Controller Parameters
 // angular velocity controller
 float Kp_phi_dot = 20;  // PWM counts per rad/s error
@@ -75,61 +75,78 @@ void loop() {
   // starting positions
   startM1 = myEnc1.read();
   startM2 = -myEnc2.read();
-  Serial.print(startM1);
-  Serial.print("\t");
-  Serial.print(startM2);
-  Serial.print("\t");
+  //Serial.print(startM1);
+  //Serial.print("\t");
+  //Serial.print(startM2);
+  //Serial.print("\t");
 
   //differences
   difference1 = startM1 - finalM1;
   difference2 = startM2 - finalM2;
-  Serial.print(difference1);
-  Serial.print("\t");
-  Serial.print(difference2);
-  Serial.print("\t");
+  //Serial.print(difference1);
+  //Serial.print("\t");
+  //Serial.print(difference2);
+  //Serial.print("\t");
 
   //angular Positons
   angularPosition1 = (difference1*2*PI)/3200;
   angularPosition2 = (difference2*2*PI)/3200;
-  Serial.print(angularPosition1);
-  Serial.print("\t");
-  Serial.print(angularPosition2);
-  Serial.print("\t");
+  //Serial.print(angularPosition1);
+  //Serial.print("\t");
+  //Serial.print(angularPosition2);
+  //Serial.print("\t");
 
   //angular Velocity
   angularVelocity1 = (1000*angularPosition1)/period;
   angularVelocity2 = (1000*angularPosition2)/period;
-  Serial.print(angularVelocity1); //Right wheen
-  Serial.print("\t");
-  Serial.print(angularVelocity2);//Left wheel
-  Serial.print("\t");
+  //Serial.print(angularVelocity1); //Right wheen
+  //Serial.print("\t");
+  //Serial.print(angularVelocity2);//Left wheel
+  //Serial.print("\t");
 
 
   // final positions 
   finalM1 = startM1;
   finalM2 = startM2;
-  Serial.print(finalM1);
-  Serial.print("\t");
-  Serial.print(finalM2);
-  Serial.print("\t");
+
+  
+
+
+  
 
   rho_dot = radius * (angularVelocity1 + angularVelocity2) * 0.5;
   phi_dot = radius * (angularVelocity1 - angularVelocity2) / distance;
   rho += rho_dot*((float)period/1000.0);
-  phi += phi_dot*((float)period/1000.0);
-  Serial.print(rho_dot);
-  Serial.print("\t");
-  Serial.print(phi_dot);
-  Serial.print("\t");
-  Serial.print(rho);
-  Serial.print("\t");
-  Serial.println(phi);
-  
+  phi += phi_dot*((float)period/1000.0);  
 
   // Controller Calculations
   Controller();
 
-
+  Serial.print(M1PWM_value);
+  Serial.print("\t");
+  Serial.print(M1PWM_value);
+  Serial.print("\t");
+  Serial.print(ANGULAR_POSITION_CONTROL);
+  Serial.print("\t");
+  Serial.print(POSITION_CONTROL);
+  Serial.print("\t");
+  Serial.print(rho_dot_setpoint);
+  Serial.print("\t");
+  Serial.print(rho_dot);
+  Serial.print("\t");
+  Serial.print(phi_dot_setpoint);
+  Serial.print("\t");
+  Serial.print(phi_dot);
+  Serial.print("\t");
+  Serial.print(rho_setpoint);
+  Serial.print("\t");
+  Serial.print(rho);
+  Serial.print("\t");
+  Serial.print(phi_setpoint);
+  Serial.print("\t");
+  Serial.print(phi);
+  Serial.print("\t");
+  
   if (millis() > time_now + period){
     Serial.println("Error: main took longer than the desired time");
   }
