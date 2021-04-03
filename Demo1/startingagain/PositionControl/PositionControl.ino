@@ -115,8 +115,8 @@ void loop() {
 
   rho_dot = radius * (angularVelocity1 + angularVelocity2) * 0.5;
   phi_dot = radius * (angularVelocity1 - angularVelocity2) / distance;
-  rho += rho_dot*period;
-  phi += phi_dot*period;
+  rho += rho_dot*((float)period/1000.0);
+  phi += phi_dot*((float)period/1000.0);
   Serial.print(rho_dot);
   Serial.print("\t");
   Serial.print(phi_dot);
