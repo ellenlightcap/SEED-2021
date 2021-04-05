@@ -18,7 +18,7 @@ i2c = busio.I2C(board.SCL, board.SDA)
 # This is the address we setup in the Arduino Program
 address = 0x04
 
-def writeNumber(value):
+def writeNumber(value, description):
     
     
     if value == None:
@@ -41,9 +41,12 @@ def writeNumber(value):
                 data[3] = (b & 0xFF000000) >> 24
 
                 #Finally, we can send the byte array over I2C
-                print("SEND FLOAT")
-                print(*data)
-                bus.write_i2c_block_data(address, 2, data)
+                #print("SEND FLOAT")
+                #print(*data)
+                if(description == 'distance'):
+                    bus.write_i2c_block_data(address, 2, data)
+                else:
+                    bus.write_i2c_block_data(address, 3, data)
             else:
                 #If the value passed through the function is already a long, then no python data type conversion is needed and we can just bitslice
           
