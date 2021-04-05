@@ -4,7 +4,8 @@
 int number = 0;
 int state = 0;
 unsigned long longValue = 0;
-float floatValue = 0;
+float distance = 0;
+float angle = 0;
 byte data[32] = {0};
 byte newdata[32] = {0};
 int i=0;
@@ -61,14 +62,19 @@ void receiveData(int byteCount){
     }else if(data[0] == 1){
       longValue = 0;
       for(byte j = 1; j<5; j++) longValue = (data[j] << ((j-1))<<3) | longValue;
+      Serial.println(longValue);
     //Float
     }else if(data[0] == 2){
-      longValue = 0;
-      for(byte j = 1; j<5; j++) longValue = (long(data[j]) << ((j-1)<<3)) | longValue;
-      floatValue = *((float*)&longValue); // evil bit level hack
-      Serial.println(floatValue);
+      long templongValue = 0;
+      for(byte j = 1; j<5; j++) templongValue = (long(data[j]) << ((j-1)<<3)) | templongValue;
+      distance = *((float*)&templongValue); // evil bit level hack
+      Serial.println(distance);
+    }else if(data[0] == 3){
+      long templongValue = 0;
+      for(byte j = 1; j<5; j++) templongValue = (long(data[j]) << ((j-1)<<3)) | templongValue;
+      angle = *((float*)&templongValue); // evil bit level hack
+      Serial.println(angle);
     }
-    
 }
 
 // callback for sending data
