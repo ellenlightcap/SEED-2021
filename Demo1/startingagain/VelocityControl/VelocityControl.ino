@@ -1,14 +1,29 @@
 #include <Encoder.h>
+#include <Wire.h>
 Encoder myEnc1(6, 2); //right wheel
 Encoder myEnc2(3, 5); // left wheel
 //sal;dfkjlk
 
+//sams stuff
+#define SLAVE_ADDRESS 0x04
+//
 #define D2 4
 #define M1DIR 7
 #define M2DIR 8
 #define M1PWM 9
 #define M2PWM 10
 #define SF 12
+
+
+//sams stuff
+int number = 0;
+int state = 0;
+unsigned long longValue = 0;
+float angle = 90;
+byte data[32] = {0};
+byte newdata[32] = {0};
+int i=0;
+//
 
 int period = 50;
 
@@ -33,18 +48,20 @@ float distance = 12;//inches
 float Kp_rho_dot = 4;  // PWM counts per in/s error
 float Ki_rho_dot = 40;
 float I_rho_dot = 0; // forward velocity integrator
-float rho_dot_setpoint = 10; // in/s
+float rho_dot_setpoint = 0; // in/s
 // Controller Parameters
 // angular velocity controller
 float Kp_phi_dot = 20;  // PWM counts per rad/s error
 float Ki_phi_dot = 200;
 float I_phi_dot=0; // angular velocity integrator
-float phi_dot_setpoint = 0; // rad/s
+float phi_dot_setpoint = 6.2; // rad/s
  
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
+
+  pinmode(13, OUTPUT);
 
   pinMode(D2, OUTPUT);
   pinMode(M1DIR, OUTPUT);
@@ -56,6 +73,14 @@ void setup() {
   
   myEnc1.write(0);
   myEnc2.write(0);
+
+  Wire.begin(SLAVE_ADDRESS);
+
+  // define callbacks for i2c communication
+  Wire.onReceive(receiveData);
+  Wire.onRequest(sendData);
+
+  Serial.println("Ready!");
 
 }
 
@@ -126,4 +151,54 @@ void loop() {
   Serial.println();
   
 
+}
+
+void receiveData(int byteCount){
+    i=0;
+    while(Wire.available()) {
+     //if(Wire.read() == 0) continue;
+     data[i] = Wire.read();
+     //Serial.print(data[i]);
+     //Serial.print(' ');
+     if(i == 0 && data[i] > 63) break;
+     i++;
+    }
+    //Byte
+    if(data[0] == 0){
+        number = data[1];
+        Serial.println(number);
+    //Long
+    }else if(data[0] == 1){
+      longValue = 0;
+      for(byte j = 1; j<5; j++) longValue = (data[j] << ((j-1))<<3) | longValue;
+      Serial.println(longValue);
+    //Float
+    }else if(data[0] == 2){
+      long templongValue = 0;
+      for(byte j = 1; j<5; j++) templongValue = (long(data[j]) << ((j-1)<<3)) | templongValue;
+      distance = *((float*)&templongValue); // evil bit level hack
+      Serial.println(distance);
+    }else if(data[0] == 3){
+      long templongValue = 0;
+      for(byte j = 1; j<5; j++) templongValue = (long(data[j]) << ((j-1)<<3)) | templongValue;
+      angle = *((float*)&templongValue); // evil bit level hack
+      Serial.println(angle);
+    }
+}
+
+// callback for sending data
+void sendData(){
+    if(data[0] == 64){
+        Wire.write(number);
+    //Long
+    }else if(data[0] == 65){
+      for(int j = 1; j < 5; j++) newdata[j] = byte(longValue & (0xFF << ((j-1) << 3)) >> ((j-1) << 3));
+      Wire.write(newdata, 4);
+    //Float
+    }else if(data[0] == 66){
+      long tempLong = * ( long *) &floatValue;
+      for(int j = 1; j < 5; j++) newdata[j] = byte(tempLong & (0xFF << ((j-1) << 3)) >> ((j-1) << 3));
+      Wire.write(newdata, 4);
+    }
+    
 }
