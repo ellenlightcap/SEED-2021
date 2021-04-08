@@ -24,14 +24,14 @@ void Controller() {
         I_phi += phi_error*(float)period/1000.0;
         phi_dot_setpoint= Kp_phi*phi_error + Kd_phi*(phi_error- phi_error_old)/((float)period/1000) + Ki_phi*I_phi;
         phi_error_old = phi_error;
-        Ki_rho_dot_use = 0;
+        Ki_phi_dot_use = 0;
    }
    if (POSITION_CONTROL) {
          rho_error = rho_setpoint - rho;
          I_rho += rho_error*(float)period/1000.0
          rho_dot_setpoint = Kp_rho*rho_error + Kd_rho*(rho_error - rho_error_old)/((float)period/1000) + Ki_rho*I_rho;
          rho_error_old = rho_error;
-         Ki_phi_dot_use = 0;
+         Ki_rho_dot_use = 0;
    }
 
    // Inner Control Loop
