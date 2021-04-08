@@ -11,6 +11,8 @@ void Controller() {
    float phi_error_old=0;
    float rho_dot_setpoint_internal=0;
    float phi_dot_setpoint_internal=0;
+   float Ki_rho_dot_use = 0;
+   float Ki_phi_dot_use = 0;
 
    // set velocity setpoints to global variables in case velocity control is desired
    rho_dot_setpoint_internal = rho_dot_setpoint;
@@ -28,7 +30,7 @@ void Controller() {
    }
    if (POSITION_CONTROL) {
          rho_error = rho_setpoint - rho;
-         I_rho += rho_error*(float)period/1000.0
+         I_rho += rho_error*(float)period/1000.0;
          rho_dot_setpoint = Kp_rho*rho_error + Kd_rho*(rho_error - rho_error_old)/((float)period/1000) + Ki_rho*I_rho;
          rho_error_old = rho_error;
          Ki_rho_dot_use = 0;

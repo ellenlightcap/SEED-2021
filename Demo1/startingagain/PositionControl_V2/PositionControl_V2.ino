@@ -38,9 +38,9 @@ float Kd_rho = 0;
 float Ki_rho = 0.73;
 float I_rho_dot = 0; // forward velocity integrator
 float I_rho = 0; // forward position integrator
-float rho_dot_setpoint = 0; // in/s
-float rho_setpoint=12;
-bool POSITION_CONTROL = true;
+float rho_dot_setpoint = 5; // in/s
+float rho_setpoint=36;
+bool POSITION_CONTROL = false;//if true then use rho_setpoint
 // Controller Parameters
 // angular velocity controller
 float Kp_phi_dot = 20;  // PWM counts per rad/s error
@@ -77,6 +77,7 @@ void loop() {
   time_now = millis();
 
   // starting positions
+  phi_setpoint = (rho)/(24);
   startM1 = myEnc1.read();
   startM2 = -myEnc2.read();
   //Serial.print(startM1);
