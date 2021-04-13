@@ -14,6 +14,8 @@ void Controller() {
    float Ki_rho_dot_use = 0;
    float Ki_phi_dot_use = 0;
    float phi_dot_max=5;
+   float Kp_phi_dot_use = 0;
+   float Kp_rho_dot_use = 0;
 
    // set velocity setpoints to global variables in case velocity control is desired
    rho_dot_setpoint_internal = rho_dot_setpoint;
@@ -96,8 +98,8 @@ void Controller() {
   analogWrite(M2PWM, M2PWM_value); 
   
  
-  Serial.print(M1PWM_value);
-  Serial.print("\t");
-  Serial.print(M2PWM_value);
-  Serial.print("\t");  
+//  Serial.print(M1PWM_value);
+//  Serial.print("\t");
+//  Serial.print(M2PWM_value);
+//  Serial.print("\t");  
 }
