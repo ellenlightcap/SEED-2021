@@ -493,6 +493,23 @@ void loop() {
 
 
 // callback for received data
+/*
+###I2C READ_ME###
+
+For this i2c protocol, we recieve data that has been byte sliced. For a number under a byte in size, we don't really need to reconstruct
+the number after we recieve it. However, the main data type being sent between the pi and the arduino is a float. In order to reassemble
+the float, we first need to recontruct all the bytes into the correct order into a single address. Luckily, both systems are little endian,
+so we don't have to worry about rearranging the bits of each byte. Once we have the long of all 4 bytes from the pi, converting it into a 
+float is where the magic happens. The line with the 'evil bit level hack' is actually from the video game Quake III (which is now completely
+open source). In essence we reference the address of the long as a float address then derefence it. This allows us to read the bits of the 
+long as a float. The last step is converting units for the controller. The distance units are the same, but the angle must be converted from
+degrees to radians. This is as simply a single linear factor. 
+
+**NOTE**
+The send data function has yet to be fully implemented. This is beacause our design doesn't have any data flow from the arduino to the pi, but
+the process would be the same as the retrieve. 
+
+*/
 void receiveData(int byteCount){
     i=0;
     while(Wire.available()) {
@@ -510,7 +527,7 @@ void receiveData(int byteCount){
     //Long
     }else if(data[0] == 1){
       longValue = 0;
-      for(byte j = 1; j<5; j++) longValue = (data[j] << ((j-1))<<3) | longValue;
+      for(byte j = 1; j<5; j++) longValue = (long(data[j]) << ((j-1))<<3) | longValue;
       Serial.println(longValue);
     //Float
     }else if(data[0] == 2){
