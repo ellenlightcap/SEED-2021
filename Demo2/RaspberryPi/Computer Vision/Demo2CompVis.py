@@ -28,14 +28,6 @@ lcd = character_lcd.Character_LCD_RGB_I2C(i2c, lcd_columns, lcd_rows)
 # This is the address we setup in the Arduino Program
 address = 0x04
 
-###I2C READ ME###
-#To send data to the arduino, we need to slice it into bytes to use the i2c functions.
-#The difficulty in this comes in the way Python handles data types. Python is dynamically
-#typed, meaning that it doesn't know what type a variable is until run time. In order to make
-#access the bits of the data, the ctypes library is used to make the data behave like 
-#in a C program. From there, we just need to do a series of masks and shifts to arrange
-#the bytes into an array.
-
 def writeNumber(value, description):
     
     
@@ -108,6 +100,10 @@ rawCapture = PiRGBArray(camera)
 time.sleep(0.1)
 camera.resolution = (WIDTH, HEIGHT)
 rawCapture.truncate(0)
+
+#creating aruco dictonary and parameters
+arucoDict = aruco.Dictionary_get(aruco.DICT_6X6_250)
+arucoParam = aruco.DetectorParameters_create()
 
 #calibrating Camera
 cal = False
@@ -184,8 +180,6 @@ while loop:
         grayImg = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
         #detecting markers
-        arucoDict = aruco.Dictionary_get(aruco.DICT_6X6_250)
-        arucoParam = aruco.DetectorParameters_create()
         (corners, ids, rejected) = aruco.detectMarkers(grayImg, arucoDict, parameters=arucoParam)
 
 
@@ -194,7 +188,7 @@ while loop:
         #cv2.waitKey(1)
         angle = cf.getAngle(dst, h, w, corners, ids)
         distance = cf.getDistance(dst, h, w, corners, ids)
-        LCDDisplayAngle(angle)
+        #LCDDisplayAngle(angle)
 
         if angle != None:
             writeNumber(float(angle),'')
