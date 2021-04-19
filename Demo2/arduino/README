@@ -1,0 +1,2 @@
+The arduino file contains all of the code that was run with C++. This code was used to get the robot to move according to the information recieved from the Pi
+The other folders in this file are in relation to either the controller aspect of the movement or the code that gives commands to move the robot
