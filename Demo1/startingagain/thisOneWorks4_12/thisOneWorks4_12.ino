@@ -225,7 +225,7 @@ void loop() {
       phi_setpoint=0;
       ANGULAR_POSITION_CONTROL = false;
       POSITION_CONTROL = true; //will let us go a certain distance forward
-      rho_setpoint=12;//in inches this will be where we put the distance from the beacon minus the numbers we need to 
+      rho_setpoint= distance - 6;//in inches this will be where we put the distance from the beacon minus the numbers we need to 
       Serial.println(rho);
       Serial.println(rho_setpoint);
       distanceDiff = rho_setpoint - rho;

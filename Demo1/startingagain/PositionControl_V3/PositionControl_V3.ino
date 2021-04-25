@@ -21,6 +21,9 @@ float angle = 90;
 byte data[32] = {0};
 byte newdata[32] = {0};
 int i=0;
+bool i2cFlag = true;
+
+int currentState = 0;
 
 int period = 50;
 
@@ -70,7 +73,7 @@ float Kd_phi = 0;
 float Ki_phi = 20; 
 float I_phi_dot=0; // angular velocity integrator
 float I_phi=0; // angular position integrator
-float phi_dot_setpoint = 0.2; // rad/s
+float phi_dot_setpoint = 0.1; // rad/s
 float phi_setpoint=0;
 bool ANGULAR_POSITION_CONTROL = false;
  
@@ -163,29 +166,56 @@ void loop() {
   // Controller Calculations
   Controller();
   int state1Time = 0;
+  int flagTime = 0;
   static float captureAngle;
   static float captureDistance;
   float forwardDistance = 0;
   switch(state){
     case 1 ://spin until finding the marker
-      if(angle != 90){
-        phi_dot_setpoint = 0;
+    
+      if(angle == 90){
         state1Time = millis();
+      }
+      else{
+        phi_dot_setpoint = 0;
+        //state1Time = millis();
+        Serial.println("Angle +1 90");
         //captureAngle = angle;
         //delay(2000);
         
         //Serial.print("hi");
         //Serial.print(captureAngle);
         //Serial.println("\t");
-      }
+      
         //delay(1000);
-        if (phi_dot_setpoint == 0){
-          if(millis() - state1Time > 1000){
-            Serial.println("ey");
-            captureAngle = angle;
-            phi = 0;
-            state = 2;
+        
+        //if (phi_dot_setpoint == 0){
+          Serial.println("phi_dot = 0");
+          Serial.println((millis() - state1Time));
+          if((millis() - state1Time) > 2000){
             
+            
+            //Serial.println("stopped angle:");
+            //i2cFlag = false;
+            //if(millis() - flagTime > 2000){
+              //i2cFlag = true;
+              captureAngle = angle;
+              phi = 0;
+              //rho = 0;
+              state = 2;
+            //}
+            //else{
+              //flagTime = millis();
+            //}
+//            delay(2000);
+//            i2cFlag = true;
+//            captureAngle = angle;
+//            phi = 0;
+//            state = 2;
+            
+          }
+          else{
+            //state1Time = millis();
           }
           //int interruptFlag = 0;
           //delay(500);
@@ -197,14 +227,16 @@ void loop() {
           //phi = 0;
           //state = 2;
           
-        }
+        //}
+      }
         //state = 2;
       
       
         break;
     case 2 ://angle correction
       Serial.println("State 2!");
-//      if(captureAngle < 0.06 || captureAngle > -0.03){
+      
+//      if(captureAngle < 0.03 || captureAngle > -0.03){
 //        state = 3;
 //      }
 //      else{
@@ -250,15 +282,21 @@ void loop() {
         
         ANGULAR_POSITION_CONTROL = true;
         Serial.println("Correcting...");
+        //captureAngle = angle;
         phi_setpoint = captureAngle;
         Serial.println(phi);
         Serial.println(phi_setpoint);
         rotateDiff = phi_setpoint - phi;
         if(rotateDiff > -0.005){
           Serial.println("Going to state 3");
-          phi = 0;
-          rho = 0;
+          //phi = 0;
+          //rho = 0;
           if(millis() - state2Time > 2000){
+            rho = 0;
+            phi = 0;
+            rho_setpoint = 0;
+            phi_setpoint = 0;
+            
             state = 3;
             myEnc1.write(0);
             myEnc2.write(0);
@@ -312,15 +350,18 @@ void loop() {
       ANGULAR_POSITION_CONTROL = false;
        //will let us go a certain distance forward
       captureDistance = distance;
-      forwardDistance = captureDistance - 12;
+      i2cFlag = false;
+      forwardDistance = captureDistance - 15;
       Serial.println(captureDistance);
       Serial.println("Forward distance");
       Serial.println(forwardDistance);
       rho_setpoint=forwardDistance;//in inches this will be where we put the distance from the beacon minus the numbers we need to 
-      rho_dot_setpoint = 8;//in/s
+      rho_dot_setpoint = 12;//in/s
       POSITION_CONTROL = false;
       Serial.println(rho);
       Serial.println(rho_setpoint);
+      Serial.println(phi);
+      Serial.println(phi_setpoint);
       distanceDiff = rho_setpoint - rho;
       int state3Time;
       if (distanceDiff < 6){
@@ -329,13 +370,14 @@ void loop() {
       else{
         POSITION_CONTROL = false;
       }
-      if (distanceDiff < 0.41){
+      if (distanceDiff < 0.45){
         if(millis() - state3Time > 1000){
           Serial.println(rho);
           Serial.println(phi);
           phi = 0;
           rho = 0;
           state = 4;
+          //state = 6;
           Serial.println("hi");
         }
         
@@ -411,7 +453,7 @@ void loop() {
       Serial.println("State 5!");
       //delay(100);
       POSITION_CONTROL = false;
-      rho_dot_setpoint = 5; // in/s
+      rho_dot_setpoint = 12; // in/s
       rho_setpoint=0;
 //      
 //      
@@ -420,7 +462,7 @@ void loop() {
       ANGULAR_POSITION_CONTROL = true;
 //      //rho = 0;
 //
-      phi_setpoint = (rho)/(12);
+      phi_setpoint = (rho)/(18);
 
       //check rho to see if gone 2pi*3
 
@@ -428,7 +470,7 @@ void loop() {
       Serial.println(phi);
       
       //Serial.println(rho_setpoint);
-      circleDiff = 71.3 - rho;
+      circleDiff = 30 - rho;
       if(circleDiff < .4){
         //ANGULAR_POSITION_CONTROL = false;
         POSITION_CONTROL = true;
@@ -492,8 +534,24 @@ void loop() {
 }
 
 
+/*
+###I2C READ_ME###
+For this i2c protocol, we recieve data that has been byte sliced. For a number under a byte in size, we don't really need to reconstruct
+the number after we recieve it. However, the main data type being sent between the pi and the arduino is a float. In order to reassemble
+the float, we first need to recontruct all the bytes into the correct order into a single address. Luckily, both systems are little endian,
+so we don't have to worry about rearranging the bits of each byte. Once we have the long of all 4 bytes from the pi, converting it into a 
+float is where the magic happens. The line with the 'evil bit level hack' is actually from the video game Quake III (which is now completely
+open source). In essence we reference the address of the long as a float address then derefence it. This allows us to read the bits of the 
+long as a float. The last step is converting units for the controller. The distance units are the same, but the angle must be converted from
+degrees to radians. This is as simply a single linear factor. 
+**NOTE**
+The send data function has yet to be fully implemented. This is beacause our design doesn't have any data flow from the arduino to the pi, but
+the process would be the same as the retrieve. 
+*/
+
 // callback for received data
 void receiveData(int byteCount){
+  if(i2cFlag){
     i=0;
     while(Wire.available()) {
      //if(Wire.read() == 0) continue;
@@ -517,29 +575,18 @@ void receiveData(int byteCount){
       long templongValue = 0;
       for(byte j = 1; j<5; j++) templongValue = (long(data[j]) << ((j-1)<<3)) | templongValue;
       distance = *((float*)&templongValue); // evil bit level hack
-      Serial.println(distance);
+      //Serial.println(distance);
     }else if(data[0] == 3){
       long templongValue = 0;
       for(byte j = 1; j<5; j++) templongValue = (long(data[j]) << ((j-1)<<3)) | templongValue;
       angle = (*((float*)&templongValue)) * (3.1415/180) ; // evil bit level hack
-      Serial.println(angle);
+      //Serial.println(angle);
     }
+  }
 }
 
 
 // callback for sending data
 void sendData(){
-    if(data[0] == 64){
-        Wire.write(number);
-    //Long
-    }else if(data[0] == 65){
-      for(int j = 1; j < 5; j++) newdata[j] = byte(longValue & (0xFF << ((j-1) << 3)) >> ((j-1) << 3));
-      Wire.write(newdata, 4);
-    //Float
-    }else if(data[0] == 66){
-      //long tempLong = * ( long *) &floatValue;
-      //for(int j = 1; j < 5; j++) newdata[j] = byte(tempLong & (0xFF << ((j-1) << 3)) >> ((j-1) << 3));
-      Wire.write(newdata, 4);
-    }
-    
+    Wire.write(currentState);
 }
