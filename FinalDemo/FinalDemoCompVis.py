@@ -100,11 +100,11 @@ HEIGHT =1232
 WIDTH = 1664
 camera = PiCamera()
 rawCapture = PiRGBArray(camera)
-time.sleep(0.1)
+camera.framerate = 32
 camera.resolution = (WIDTH, HEIGHT)
+time.sleep(0.1)
 rawCapture.truncate(0)
-vid = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FPS, 60)
+
 
 #creating aruco dictonary and parameters
 arucoDict = aruco.Dictionary_get(aruco.DICT_6X6_250)
@@ -171,11 +171,10 @@ readTvecs.close
 loop = True
 currentMarker = 0;
 #taking pictures continuously  MAIN LOOP
-while loop:
+for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     try:
         #take image and undistort
         #camera.capture(rawCapture,format='bgr')
-        ret, img = vid.read().array
         h, w = img.shape[:2]
         newcameramtx, roi=cv2.getOptimalNewCameraMatrix(mtx,dist,(w,h),1,(w,h))
         dst = cv2.undistort(img, mtx,dist, None, newcameramtx)
