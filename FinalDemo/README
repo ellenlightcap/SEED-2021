@@ -1,1 +1,5 @@
 This is the code for the final demo
+This folder is split into two different sections. the first folder contains all of the code used for this demo that was run on the arduino (written in C++)
+The arduino code mostly controlled the movement of the robot based on the information that was recieved from the camera. The transfer of information is done using code written 
+in the arduino folder and the raspberry pi folder.
+The raspberry pi folder has all of the code written in python. This code mostly controlled the camera that gave the location of the robot and the code that was used to send and recieve information to and from the arduino.
