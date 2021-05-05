@@ -1,0 +1,3 @@
+This file contains all of the code ran on the Raspberry Pi. This file is split into two folders, one for the code for the camera and one for the system integration.
+Eventually the system integration code was combined with both the arduino code and the camera code so we could get the i2c communcation between the arduino and the pi 
+functioning. 

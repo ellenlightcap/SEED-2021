@@ -1,0 +1,1 @@
+This folder contains all of the code used for Demo 2. The folder is split up into code that was written for the arduino and the raspberry pi. In each of these folders is the code used to get the robot to move (arduino) and the code used to get the robot to see the markers (computer vision) and the code used to send the data from the pi to the arduino (system integration)

@@ -101,6 +101,10 @@ time.sleep(0.1)
 camera.resolution = (WIDTH, HEIGHT)
 rawCapture.truncate(0)
 
+#creating aruco dictonary and parameters
+arucoDict = aruco.Dictionary_get(aruco.DICT_6X6_250)
+arucoParam = aruco.DetectorParameters_create()
+
 #calibrating Camera
 cal = False
 if cal:
@@ -176,8 +180,6 @@ while loop:
         grayImg = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
         #detecting markers
-        arucoDict = aruco.Dictionary_get(aruco.DICT_6X6_250)
-        arucoParam = aruco.DetectorParameters_create()
         (corners, ids, rejected) = aruco.detectMarkers(grayImg, arucoDict, parameters=arucoParam)
 
 
@@ -186,7 +188,7 @@ while loop:
         #cv2.waitKey(1)
         angle = cf.getAngle(dst, h, w, corners, ids)
         distance = cf.getDistance(dst, h, w, corners, ids)
-        LCDDisplayAngle(angle)
+        #LCDDisplayAngle(angle)
 
         if angle != None:
             writeNumber(float(angle),'')
