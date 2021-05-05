@@ -22,11 +22,10 @@ byte data[32] = {0};
 byte newdata[32] = {0};
 int i=0;
 bool i2cFlag = true;
-<<<<<<< HEAD:Demo1/startingagain/PositionControl_V3/PositionControl_V3.ino
 
 int currentState = 0;
-=======
->>>>>>> 9074d2f1330d87a60e2bfb0007ef189da7f77ced:Demo2/arduino/PositionControl_V3/PositionControl_V3.ino
+
+
 
 int period = 50;
 
@@ -197,7 +196,7 @@ void loop() {
           Serial.println((millis() - state1Time));
           if((millis() - state1Time) > 2000){
             
-<<<<<<< HEAD:Demo1/startingagain/PositionControl_V3/PositionControl_V3.ino
+
             
             //Serial.println("stopped angle:");
             //i2cFlag = false;
@@ -216,8 +215,7 @@ void loop() {
 //            captureAngle = angle;
 //            phi = 0;
 //            state = 2;
-=======
->>>>>>> 9074d2f1330d87a60e2bfb0007ef189da7f77ced:Demo2/arduino/PositionControl_V3/PositionControl_V3.ino
+
             
             //Serial.println("stopped angle:");
             //i2cFlag = false;
@@ -238,12 +236,12 @@ void loop() {
 //            state = 2;
             
           }
-          else{
+          //else{
             //state1Time = millis();
-          }
-          else{
+          //}
+          //else{
             //state1Time = millis();
-          }
+          //}
           //int interruptFlag = 0;
           //delay(500);
           //interruptFlag = 1;
@@ -314,7 +312,8 @@ void loop() {
         Serial.println(phi);
         Serial.println(phi_setpoint);
         rotateDiff = phi_setpoint - phi;
-        if(rotateDiff > -0.005){
+        Serial.println(rotateDiff);
+        if((rotateDiff > -0.005) && (rotateDiff < 0.005)){
           Serial.println("Going to state 3");
           //phi = 0;
           //rho = 0;
@@ -324,9 +323,9 @@ void loop() {
             rho_setpoint = 0;
             phi_setpoint = 0;
             
-            state = 3;
-            myEnc1.write(0);
-            myEnc2.write(0);
+            //state = 3;
+            //myEnc1.write(0);
+            //myEnc2.write(0);
           }
           else{
             state2Time = millis();
@@ -390,6 +389,7 @@ void loop() {
       Serial.println(phi);
       Serial.println(phi_setpoint);
       distanceDiff = rho_setpoint - rho;
+      Serial.println(distanceDiff);
       int state3Time;
       if (distanceDiff < 6){
         POSITION_CONTROL = true;
@@ -497,11 +497,8 @@ void loop() {
       Serial.println(phi);
       
       //Serial.println(rho_setpoint);
-<<<<<<< HEAD:Demo1/startingagain/PositionControl_V3/PositionControl_V3.ino
       circleDiff = 30 - rho;
-=======
-      circleDiff = 105 - rho;
->>>>>>> 9074d2f1330d87a60e2bfb0007ef189da7f77ced:Demo2/arduino/PositionControl_V3/PositionControl_V3.ino
+
       if(circleDiff < .4){
         //ANGULAR_POSITION_CONTROL = false;
         POSITION_CONTROL = true;
@@ -523,7 +520,16 @@ void loop() {
         break;
 
     case 6:
+
+        currentState++;
+        state = 1;
+        if (currentState == 6){
+          state = 7;
+        }
     
+        break;
+    case 7:
+
         break;
         
         
